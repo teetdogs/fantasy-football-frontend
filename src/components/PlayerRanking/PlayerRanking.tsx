@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Player, RankingWeights } from '../../types';
+import type { RankingWeights } from '../../types';
 import { useFetchPlayers } from '../../hooks/useFetchPlayers';
 import './PlayerRanking.css';
 

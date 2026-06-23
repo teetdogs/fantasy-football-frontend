@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard } from './components';
 import { useFetchPlayers } from './hooks/useFetchPlayers';
 import type { RankingWeights } from './types';
