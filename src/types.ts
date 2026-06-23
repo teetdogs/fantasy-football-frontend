@@ -11,6 +11,7 @@ export interface Player {
   projected_points?: number;
   score?: number;
   rank?: number;
+  imageUrl?: string;
 }
 
 export interface RankingWeights {

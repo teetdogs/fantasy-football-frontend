@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { RankingWeights } from '../../types';
+import type { Player } from '../../types';
 import { useFetchPlayers } from '../../hooks/useFetchPlayers';
+import { PlayerCard } from '../PlayerCard/PlayerCard';
 import './PlayerRanking.css';
 
 interface PlayerRankingProps {
@@ -25,6 +27,8 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   const { players, loading, error } = useFetchPlayers(weights);
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortAsc, setSortAsc] = useState(true);
+  const [hoveredPlayer, setHoveredPlayer] = useState<Player | null>(null);
+  const [cardPos, setCardPos] = useState({ x: 0, y: 0 });
 
   const filteredPlayers = positionFilter
     ? players.filter((p) => p.position === positionFilter)
@@ -48,6 +52,19 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
       setSortField(field);
       setSortAsc(field === 'name' || field === 'rank' || field === 'adp');
     }
+  };
+
+  const handlePlayerHover = (player: Player, e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setHoveredPlayer(player);
+    setCardPos({
+      x: rect.right + 12,
+      y: rect.top - 40,
+    });
+  };
+
+  const handlePlayerLeave = () => {
+    setHoveredPlayer(null);
   };
 
   if (loading)
@@ -95,7 +112,11 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
           </thead>
           <tbody>
             {sortedPlayers.map((player) => (
-              <tr key={player.id}>
+              <tr
+                key={player.id}
+                onMouseEnter={(e) => handlePlayerHover(player, e)}
+                onMouseLeave={handlePlayerLeave}
+              >
                 <td className="rank tnum">{player.rank ?? '—'}</td>
                 <td className="name">{player.name}</td>
                 <td>
@@ -125,6 +146,8 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
           </tbody>
         </table>
       </div>
+
+      {hoveredPlayer && <PlayerCard player={hoveredPlayer} position={cardPos} />}
     </div>
   );
 };
