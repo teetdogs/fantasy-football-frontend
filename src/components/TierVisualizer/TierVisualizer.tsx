@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import Plot from 'react-plotly.js';
-import { Player } from '../../types';
+import type { Player } from '../../types';
 import './TierVisualizer.css';
 
 interface TierVisualizerProps {

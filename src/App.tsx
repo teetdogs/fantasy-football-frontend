@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard } from './components';
 import { useFetchPlayers } from './hooks/useFetchPlayers';
-import { RankingWeights } from './types/index';
+import type { RankingWeights } from './types';
 import './App.css';
 
 function App() {
