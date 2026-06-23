@@ -1,66 +1,17 @@
-.tier-visualizer {
-  width: 100%;
-  padding: 24px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  margin: 0;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.plot-wrap {
+  padding: 14px 10px 4px;
 }
 
-.tier-visualizer h2 {
-  margin: 0 0 20px 0;
-  color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.plot-note {
+  padding: 0 18px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
 }
 
-.plot-container {
-  background: var(--dark-bg);
-  border-radius: 8px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.tier-visualizer .placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  background: var(--dark-bg);
-  border-radius: 8px;
-  color: var(--text-muted);
-  font-size: 16px;
-  border: 1px solid var(--border-color);
-}
-
-.legend {
-  margin-top: 14px;
-  padding: 12px 14px;
-  background: rgba(59, 130, 246, 0.05);
-  border-left: 3px solid var(--primary-light);
-  border-radius: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.legend p {
-  margin: 0;
-}
-
-/* Plotly theme overrides */
-.tier-visualizer .plotly-graph-div {
-  background: var(--dark-bg) !important;
-}
-
-.tier-visualizer .plotly-graph-div .xtitle,
-.tier-visualizer .plotly-graph-div .ytitle {
-  color: var(--text-primary) !important;
-}
-
-.tier-visualizer .plotly-graph-div text {
-  fill: var(--text-secondary) !important;
+/* Keep Plotly's hover label on-brand */
+.tier .hoverlayer .hovertext path,
+.plot-wrap .hovertext path {
+  fill: var(--surface-3) !important;
+  stroke: var(--border-strong) !important;
 }

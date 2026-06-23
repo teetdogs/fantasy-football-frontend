@@ -1,153 +1,83 @@
-.draft-board {
-  width: 100%;
-  padding: 24px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  margin: 0;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.board {
+  padding: 18px;
 }
 
-.draft-board h2 {
-  margin: 0 0 20px 0;
-  color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.board-container {
-  background: var(--dark-bg);
-  border-radius: 12px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
-  padding: 24px;
-  border: 1px solid var(--border-color);
-}
-
-.board-legend {
-  margin-bottom: 24px;
-  padding: 12px 14px;
-  background: rgba(59, 130, 246, 0.08);
-  border-left: 3px solid var(--primary-light);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-}
-
-.board-legend p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
+.board-note {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin-bottom: 18px;
+  max-width: 640px;
 }
 
 .roster {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
 }
 
-.roster-slot {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.3s;
+.slot {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+  transition: border-color 0.15s, transform 0.15s;
 }
-
-.roster-slot:hover {
+.slot:hover {
+  border-color: var(--border-strong);
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  border-color: var(--primary-light);
 }
 
-.position-label {
-  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-  color: white;
-  padding: 10px 8px;
-  font-weight: 700;
-  font-size: 12px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid var(--accent);
-}
-
-.player-slot {
-  padding: 14px 10px;
-  text-align: center;
-  min-height: 80px;
+.slot-top {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.player-slot.empty {
-  color: var(--text-muted);
-  font-size: 24px;
-  font-weight: 300;
+.slot-no {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
 }
 
-.player-name {
+.slot-body {
+  min-height: 38px;
+}
+
+.slot-name {
+  display: block;
+  font-size: 13.5px;
   font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 6px;
+  color: var(--text);
+  margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-primary);
 }
 
-.player-details {
+.slot-meta {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 10px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.player-details .rank {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.player-details .score {
-  color: var(--primary-light);
+  font-size: 11.5px;
+  color: var(--text-dim);
   font-weight: 600;
 }
 
-/* Position-specific colors */
-.roster-slot.pos-qb .position-label {
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-  border-bottom-color: #34d399;
+.slot-score {
+  color: var(--accent);
 }
 
-.roster-slot.pos-rb .position-label {
-  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-  border-bottom-color: #60a5fa;
+.slot-body.empty {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
 }
 
-.roster-slot.pos-wr .position-label {
-  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
-  border-bottom-color: #fbbf24;
-}
-
-.roster-slot.pos-te .position-label {
-  background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
-  border-bottom-color: #a78bfa;
-}
-
-.roster-slot.pos-k .position-label {
-  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-  border-bottom-color: #f87171;
-}
-
-.roster-slot.pos-def .position-label {
-  background: linear-gradient(90deg, #06b6d4 0%, #0891b2 100%);
-  border-bottom-color: #22d3ee;
-}
-
-.roster-slot.pos-flex .position-label {
-  background: linear-gradient(90deg, #00d084 0%, #00a86b 100%);
-  border-bottom-color: #4ade80;
+/* FLEX badge color (other positions defined alongside .pos-badge) */
+.pos-badge[data-pos='flex'] {
+  --pos: var(--pos-flex);
 }

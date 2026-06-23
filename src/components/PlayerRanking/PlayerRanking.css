@@ -1,187 +1,150 @@
-.player-ranking {
-  width: 100%;
-  padding: 24px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  margin: 0;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.player-ranking h2 {
-  margin: 0 0 20px 0;
-  color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.player-ranking.loading,
-.player-ranking.error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  font-size: 16px;
-}
-
-.player-ranking.loading {
-  color: var(--text-muted);
-}
-
-.player-ranking.error {
-  color: #fca5a5;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--danger);
-}
-
-.table-container {
+.table-wrap {
   overflow-x: auto;
-  border-radius: 8px;
-  background: var(--dark-bg);
 }
 
-.player-ranking table {
+.ranking-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--card-bg);
 }
 
-.player-ranking thead {
-  background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 100%);
-  color: white;
-  font-weight: 600;
+.ranking-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.player-ranking th {
-  padding: 14px 12px;
+  letter-spacing: 0.06em;
   text-align: left;
-  font-size: 12px;
-  border-bottom: 2px solid var(--border-color);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
-.player-ranking th.sortable {
+.ranking-table th.right {
+  text-align: right;
+}
+
+.ranking-table th.sortable {
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.2s;
+  transition: color 0.15s;
+}
+.ranking-table th.sortable:hover {
+  color: var(--text);
 }
 
-.player-ranking th.sortable:hover {
-  background: rgba(30, 64, 175, 0.8);
-}
-
-.player-ranking td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.player-ranking tbody tr {
-  transition: all 0.2s;
-}
-
-.player-ranking tbody tr:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  box-shadow: inset 4px 0 0 0 var(--primary-light);
-}
-
-.player-ranking .rank {
-  font-weight: 700;
-  width: 50px;
-  text-align: center;
+.sort-ind {
+  margin-left: 5px;
+  font-size: 8px;
   color: var(--accent);
-  font-size: 16px;
+  vertical-align: middle;
 }
 
-.player-ranking .name {
-  font-weight: 600;
-  min-width: 180px;
-  color: var(--text-primary);
-}
-
-.player-ranking .position {
-  width: 70px;
-  text-align: center;
-  font-weight: 600;
-  color: var(--primary-light);
-  text-transform: uppercase;
-}
-
-.player-ranking .team {
-  width: 70px;
-  text-align: center;
-  font-size: 12px;
+.ranking-table tbody td {
+  padding: 11px 14px;
+  font-size: 13.5px;
   color: var(--text-muted);
-  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
-.player-ranking .adp {
-  width: 90px;
-  text-align: center;
-  font-weight: 500;
+.ranking-table tbody tr {
+  transition: background 0.12s;
+}
+.ranking-table tbody tr:hover {
+  background: var(--surface-2);
+}
+.ranking-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.player-ranking .adp .range {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.player-ranking .projection {
-  width: 100px;
-  text-align: center;
-  font-weight: 500;
-  color: var(--success);
-}
-
-.player-ranking .score {
-  width: 80px;
-  text-align: center;
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 16px;
-}
-
-.player-ranking .bye {
-  width: 60px;
-  text-align: center;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-/* Position-specific colors */
-.player-ranking tbody tr.pos-qb:hover {
-  box-shadow: inset 4px 0 0 0 #10b981;
-}
-
-.player-ranking tbody tr.pos-rb:hover {
-  box-shadow: inset 4px 0 0 0 #3b82f6;
-}
-
-.player-ranking tbody tr.pos-wr:hover {
-  box-shadow: inset 4px 0 0 0 #f59e0b;
-}
-
-.player-ranking tbody tr.pos-te:hover {
-  box-shadow: inset 4px 0 0 0 #8b5cf6;
-}
-
-.player-ranking tbody tr.pos-k:hover {
-  box-shadow: inset 4px 0 0 0 #ef4444;
-}
-
-.player-ranking tbody tr.pos-def:hover {
-  box-shadow: inset 4px 0 0 0 #06b6d4;
-}
-
-.summary {
-  margin-top: 14px;
-  font-size: 12px;
-  color: var(--text-muted);
+.ranking-table td.right {
   text-align: right;
+}
+
+.ranking-table .rank {
+  width: 44px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.ranking-table .name {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 150px;
+}
+
+.ranking-table .team {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.ranking-table .proj {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ranking-table .bye {
+  color: var(--text-dim);
+}
+
+.sub {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  margin-top: 1px;
   font-weight: 500;
+}
+
+/* Position badge */
+.pos-badge {
+  display: inline-block;
+  min-width: 34px;
+  text-align: center;
+  padding: 2.5px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--pos, var(--text));
+  background: color-mix(in srgb, var(--pos, var(--text-dim)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pos, var(--text-dim)) 30%, transparent);
+}
+.pos-badge[data-pos='qb'] { --pos: var(--pos-qb); }
+.pos-badge[data-pos='rb'] { --pos: var(--pos-rb); }
+.pos-badge[data-pos='wr'] { --pos: var(--pos-wr); }
+.pos-badge[data-pos='te'] { --pos: var(--pos-te); }
+.pos-badge[data-pos='k'] { --pos: var(--pos-k); }
+.pos-badge[data-pos='def'] { --pos: var(--pos-def); }
+
+/* Score cell with mini bar */
+.score-cell {
+  width: 96px;
+}
+.score-val {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+}
+.score-bar {
+  display: block;
+  margin-top: 4px;
+  margin-left: auto;
+  width: 60px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.score-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
 }

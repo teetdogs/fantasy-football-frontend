@@ -14,28 +14,37 @@ export const DraftBoard: React.FC<DraftBoardProps> = ({ players }) => {
   };
 
   return (
-    <div className="draft-board">
-      <h2>Draft Board (Strategy Mockup)</h2>
-      <div className="board-container">
-        <div className="board-legend">
-          <p>This mockup shows typical roster construction. Full draft simulation coming in Phase 2.</p>
-        </div>
+    <div className="card">
+      <div className="card-head">
+        <h2>Draft Board</h2>
+        <span className="count">starter blueprint</span>
+      </div>
+      <div className="board">
+        <p className="board-note">
+          A typical 10-slot starting lineup, auto-filled with your top available player at each spot.
+          Live, snake-style draft simulation is coming in a later phase.
+        </p>
         <div className="roster">
           {positions.map((pos, idx) => {
             const player = getTopPlayerByPosition(pos);
             return (
-              <div key={idx} className={`roster-slot pos-${pos.toLowerCase()}`}>
-                <div className="position-label">{pos}</div>
+              <div className="slot" key={idx}>
+                <div className="slot-top">
+                  <span className="pos-badge" data-pos={pos.toLowerCase()}>
+                    {pos}
+                  </span>
+                  <span className="slot-no tnum">{idx + 1}</span>
+                </div>
                 {player ? (
-                  <div className="player-slot">
-                    <div className="player-name">{player.name}</div>
-                    <div className="player-details">
-                      <span className="rank">#{player.rank}</span>
-                      <span className="score">{player.score?.toFixed(1)}</span>
-                    </div>
+                  <div className="slot-body">
+                    <span className="slot-name">{player.name}</span>
+                    <span className="slot-meta">
+                      <span className="tnum">#{player.rank}</span>
+                      <span className="slot-score tnum">{player.score?.toFixed(1)}</span>
+                    </span>
                   </div>
                 ) : (
-                  <div className="player-slot empty">-</div>
+                  <div className="slot-body empty">Open</div>
                 )}
               </div>
             );
