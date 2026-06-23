@@ -55,12 +55,25 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   };
 
   const handlePlayerHover = (player: Player, e: React.MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // Get position of the name cell
+    const nameCell = (e.currentTarget as HTMLElement).querySelector('.name') as HTMLElement;
+    if (!nameCell) return;
+
+    const rect = nameCell.getBoundingClientRect();
+    const cardWidth = 280;
+    const cardHeight = 340;
+
+    // Center the card over the name, with fallback to right side if it would go off-screen
+    let x = rect.left + rect.width / 2 - cardWidth / 2;
+    let y = rect.top - cardHeight - 12;
+
+    // Clamp to viewport
+    if (x < 8) x = 8;
+    if (x + cardWidth > window.innerWidth - 8) x = window.innerWidth - cardWidth - 8;
+    if (y < 8) y = rect.bottom + 12;
+
     setHoveredPlayer(player);
-    setCardPos({
-      x: rect.right + 12,
-      y: rect.top - 40,
-    });
+    setCardPos({ x, y });
   };
 
   const handlePlayerLeave = () => {
