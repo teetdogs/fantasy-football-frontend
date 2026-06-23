@@ -81,7 +81,7 @@ function App() {
           <span className="meta-sep" />
           <span className="meta-item tnum">{players.length} players</span>
           <span className="meta-sep" />
-          <span className="meta-item">2024 season · mock data</span>
+          <span className="meta-item">2026 season · ESPN</span>
         </div>
       </header>
 
