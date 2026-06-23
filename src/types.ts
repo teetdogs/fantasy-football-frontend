@@ -1,3 +1,22 @@
+export interface LastSeasonStats {
+  season: number;
+  games: number;
+  comp: number;
+  att: number;
+  passYds: number;
+  passTd: number;
+  int: number;
+  car: number;
+  rushYds: number;
+  rushTd: number;
+  rec: number;
+  tgt: number;
+  recYds: number;
+  recTd: number;
+  ppr: number;
+  ppg: number;
+}
+
 export interface Player {
   id: number;
   name: string;
@@ -12,6 +31,7 @@ export interface Player {
   score?: number;
   rank?: number;
   imageUrl?: string;
+  lastSeason?: LastSeasonStats | null;
 }
 
 export interface RankingWeights {

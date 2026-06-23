@@ -57,7 +57,7 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   const handlePlayerHover = (player: Player, e: React.MouseEvent) => {
     // Get the viewport center and position card there
     const cardWidth = 280;
-    const cardHeight = 340;
+    const cardHeight = 440;
 
     // Center horizontally in viewport
     let x = (window.innerWidth - cardWidth) / 2;

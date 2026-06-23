@@ -1,4 +1,4 @@
-import type { Player } from '../../types';
+import type { Player, LastSeasonStats } from '../../types';
 import './PlayerCard.css';
 
 interface PlayerCardProps {
@@ -15,32 +15,74 @@ const POSITION_COLORS: Record<string, string> = {
   DEF: '#8a97ad',
 };
 
+const FALLBACK_IMG =
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"%3E%3Crect fill="%231c2638" width="120" height="160"/%3E%3Ccircle cx="60" cy="45" r="20" fill="%235e6b82"/%3E%3Cpath d="M30 80c0-17 13-30 30-30s30 13 30 30v35H30Z" fill="%235e6b82"/%3E%3C/svg%3E';
+
+// Position-aware stat lines pulled from the real last-season totals.
+function statLines(pos: string, s: LastSeasonStats): { label: string; value: string }[] {
+  switch (pos) {
+    case 'QB':
+      return [
+        { label: 'Pass Yds', value: s.passYds.toLocaleString() },
+        { label: 'Pass TD', value: `${s.passTd}` },
+        { label: 'INT', value: `${s.int}` },
+        { label: 'Rush Yds', value: `${s.rushYds}` },
+        { label: 'Rush TD', value: `${s.rushTd}` },
+        { label: 'Comp', value: `${s.comp}/${s.att}` },
+      ];
+    case 'RB':
+      return [
+        { label: 'Rush Yds', value: s.rushYds.toLocaleString() },
+        { label: 'Rush TD', value: `${s.rushTd}` },
+        { label: 'Carries', value: `${s.car}` },
+        { label: 'Rec', value: `${s.rec}` },
+        { label: 'Rec Yds', value: `${s.recYds}` },
+        { label: 'Rec TD', value: `${s.recTd}` },
+      ];
+    default: // WR / TE
+      return [
+        { label: 'Rec', value: `${s.rec}` },
+        { label: 'Targets', value: `${s.tgt}` },
+        { label: 'Rec Yds', value: s.recYds.toLocaleString() },
+        { label: 'Rec TD', value: `${s.recTd}` },
+        { label: 'Rush Yds', value: `${s.rushYds}` },
+        { label: 'Rush TD', value: `${s.rushTd}` },
+      ];
+  }
+}
+
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, position }) => {
-  const bgImage = player.imageUrl || `https://api.placeholder.com/120/160?text=${encodeURIComponent(player.name)}`;
+  const color = POSITION_COLORS[player.position] || '#93a1b8';
+  const ls = player.lastSeason;
 
   return (
-    <div className="player-card" style={position ? { left: `${position.x}px`, top: `${position.y}px` } : {}}>
-      {/* Photo */}
+    <div
+      className="player-card"
+      style={position ? { left: `${position.x}px`, top: `${position.y}px` } : {}}
+    >
       <div className="card-photo">
-        <img src={bgImage} alt={player.name} onError={(e) => {
-          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"%3E%3Crect fill="%231c2638" width="120" height="160"/%3E%3Ccircle cx="60" cy="45" r="20" fill="%235e6b82"/%3E%3Cpath d="M30 80c0-17 13-30 30-30s30 13 30 30v35H30Z" fill="%235e6b82"/%3E%3C/svg%3E';
-        }} />
+        <img
+          src={player.imageUrl || FALLBACK_IMG}
+          alt={player.name}
+          onError={(e) => ((e.target as HTMLImageElement).src = FALLBACK_IMG)}
+        />
       </div>
 
-      {/* Info */}
       <div className="card-body">
         <div className="card-header">
           <div>
             <h4 className="card-name">{player.name}</h4>
-            <span className="card-team" style={{ color: POSITION_COLORS[player.position] || '#93a1b8' }}>
+            <span className="card-team" style={{ color }}>
               {player.nfl_team || player.team}
+              {player.bye_week ? ` · Bye ${player.bye_week}` : ''}
             </span>
           </div>
-          <span className="card-pos" style={{ background: POSITION_COLORS[player.position] || '#5e6b82' }}>
+          <span className="card-pos" style={{ background: color }}>
             {player.position}
           </span>
         </div>
 
+        {/* Draft inputs */}
         <div className="card-stats">
           <div className="stat">
             <span className="stat-label">Rank</span>
@@ -56,15 +98,30 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, position }) => {
           </div>
           <div className="stat">
             <span className="stat-label">Score</span>
-            <span className="stat-val score tnum">{player.score?.toFixed(2) || '—'}</span>
+            <span className="stat-val score tnum">{player.score?.toFixed(1) || '—'}</span>
           </div>
         </div>
 
-        {player.bye_week && (
-          <div className="card-bye">
-            <span className="bye-label">Bye week</span>
-            <span className="bye-val tnum">{player.bye_week}</span>
+        {/* Real last-season production */}
+        {ls ? (
+          <div className="card-season">
+            <div className="season-head">
+              <span className="season-title">{ls.season} Season</span>
+              <span className="season-summary tnum">
+                {ls.games} G · <strong>{ls.ppg}</strong> PPR/g
+              </span>
+            </div>
+            <div className="season-grid">
+              {statLines(player.position, ls).map((line) => (
+                <div className="season-stat" key={line.label}>
+                  <span className="season-val tnum">{line.value}</span>
+                  <span className="season-label">{line.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
+        ) : (
+          <div className="card-season empty">No prior-season NFL stats (rookie or inactive)</div>
         )}
       </div>
     </div>
