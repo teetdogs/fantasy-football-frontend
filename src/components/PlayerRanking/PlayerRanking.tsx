@@ -55,22 +55,22 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   };
 
   const handlePlayerHover = (player: Player, e: React.MouseEvent) => {
-    // Get position of the name cell
-    const nameCell = (e.currentTarget as HTMLElement).querySelector('.name') as HTMLElement;
-    if (!nameCell) return;
-
-    const rect = nameCell.getBoundingClientRect();
+    // Get the viewport center and position card there
     const cardWidth = 280;
     const cardHeight = 340;
 
-    // Center the card over the name, with fallback to right side if it would go off-screen
-    let x = rect.left + rect.width / 2 - cardWidth / 2;
-    let y = rect.top - cardHeight - 12;
+    // Center horizontally in viewport
+    let x = (window.innerWidth - cardWidth) / 2;
 
-    // Clamp to viewport
-    if (x < 8) x = 8;
-    if (x + cardWidth > window.innerWidth - 8) x = window.innerWidth - cardWidth - 8;
-    if (y < 8) y = rect.bottom + 12;
+    // Get the row position to place card above it
+    const row = e.currentTarget as HTMLElement;
+    const rowRect = row.getBoundingClientRect();
+    let y = rowRect.top - cardHeight - 16;
+
+    // If not enough space above, put it below
+    if (y < 10) {
+      y = rowRect.bottom + 16;
+    }
 
     setHoveredPlayer(player);
     setCardPos({ x, y });
