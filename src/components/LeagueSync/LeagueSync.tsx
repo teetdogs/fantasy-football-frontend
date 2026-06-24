@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import type { LeagueSettings, LeagueTeam, LeagueCredentials } from '../../types';
 import './LeagueSync.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const LS_KEY = 'draftlab_league';
+
+function loadSaved(): { creds: LeagueCredentials; settings: LeagueSettings; teams: LeagueTeam[] } | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
 interface Props {
   onConnected?: (settings: LeagueSettings, teams: LeagueTeam[], creds: LeagueCredentials) => void;
@@ -12,15 +20,22 @@ interface Props {
 type Step = 'form' | 'connected';
 
 export function LeagueSync({ onConnected }: Props) {
-  const [leagueId, setLeagueId] = useState('');
-  const [swid, setSwid] = useState('');
-  const [espnS2, setEspnS2] = useState('');
-  const [step, setStep] = useState<Step>('form');
+  const saved = loadSaved();
+  const [leagueId, setLeagueId] = useState(saved?.creds.leagueId || '');
+  const [swid, setSwid] = useState(saved?.creds.swid || '');
+  const [espnS2, setEspnS2] = useState(saved?.creds.espnS2 || '');
+  const [step, setStep] = useState<Step>(saved ? 'connected' : 'form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [settings, setSettings] = useState<LeagueSettings | null>(null);
-  const [teams, setTeams] = useState<LeagueTeam[]>([]);
+  const [settings, setSettings] = useState<LeagueSettings | null>(saved?.settings || null);
+  const [teams, setTeams] = useState<LeagueTeam[]>(saved?.teams || []);
   const [showGuide, setShowGuide] = useState(true);
+  const [showS2, setShowS2] = useState(false);
+
+  useEffect(() => {
+    if (saved && settings) onConnected?.(settings, teams, saved.creds);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const cleanSwid = (v: string) => {
     let s = v.trim();
@@ -53,6 +68,7 @@ export function LeagueSync({ onConnected }: Props) {
       setSettings(settingsRes.data);
       setTeams(teamsRes.data.teams || []);
       setStep('connected');
+      localStorage.setItem(LS_KEY, JSON.stringify({ creds, settings: settingsRes.data, teams: teamsRes.data.teams || [] }));
       onConnected?.(settingsRes.data, teamsRes.data.teams || [], creds);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
@@ -70,6 +86,10 @@ export function LeagueSync({ onConnected }: Props) {
     setSettings(null);
     setTeams([]);
     setError(null);
+    setLeagueId('');
+    setSwid('');
+    setEspnS2('');
+    localStorage.removeItem(LS_KEY);
   };
 
   if (step === 'connected' && settings) {
@@ -192,11 +212,15 @@ export function LeagueSync({ onConnected }: Props) {
               <div className="ls-step-num">2</div>
               <div className="ls-step-content">
                 <h4>Find your SWID cookie</h4>
+                <div className="ls-tip" style={{ marginBottom: '8px' }}>
+                  <strong>Heads up:</strong> You'll need a desktop or laptop browser for this step — cookies aren't accessible on mobile.
+                </div>
                 <p>While on espn.com, open your browser's Developer Tools:</p>
                 <ul>
-                  <li><strong>Chrome / Edge:</strong> Press <kbd>F12</kbd> or <kbd>Cmd+Opt+I</kbd> (Mac) / <kbd>Ctrl+Shift+I</kbd> (Windows)</li>
-                  <li>Go to the <strong>Application</strong> tab</li>
-                  <li>In the left sidebar, expand <strong>Cookies</strong> → click <strong>https://www.espn.com</strong></li>
+                  <li><strong>Chrome / Edge:</strong> Press <kbd>F12</kbd> or <kbd>Cmd+Opt+I</kbd> (Mac) / <kbd>Ctrl+Shift+I</kbd> (Windows) → <strong>Application</strong> tab</li>
+                  <li><strong>Safari:</strong> Enable Develop menu in Preferences → Advanced, then <kbd>Cmd+Opt+I</kbd> → <strong>Storage</strong> tab</li>
+                  <li><strong>Firefox:</strong> Press <kbd>F12</kbd> → <strong>Storage</strong> tab</li>
+                  <li>Expand <strong>Cookies</strong> → click <strong>https://www.espn.com</strong></li>
                   <li>Find the cookie named <strong>SWID</strong> — copy its value (looks like <code>{"{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}"}</code>)</li>
                 </ul>
               </div>
@@ -249,13 +273,22 @@ export function LeagueSync({ onConnected }: Props) {
 
           <div className="ls-field">
             <label htmlFor="ls-espn-s2">espn_s2</label>
-            <input
-              id="ls-espn-s2"
-              type="password"
-              placeholder="Long cookie string…"
-              value={espnS2}
-              onChange={(e) => setEspnS2(e.target.value)}
-            />
+            <div className="ls-s2-row">
+              <input
+                id="ls-espn-s2"
+                type={showS2 ? 'text' : 'password'}
+                placeholder="Long cookie string…"
+                value={espnS2}
+                onChange={(e) => setEspnS2(e.target.value)}
+              />
+              <button className="ls-eye" type="button" onClick={() => setShowS2((v) => !v)} title={showS2 ? 'Hide' : 'Show'}>
+                {showS2 ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
+            </div>
             <span className="ls-field-hint">This is a long string — paste the whole thing</span>
           </div>
 

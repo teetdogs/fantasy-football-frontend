@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import type { Player, RankingWeights } from '../types';
 
@@ -8,31 +8,33 @@ export const useFetchPlayers = (weights?: RankingWeights) => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const weightsRef = useRef(weights);
+  weightsRef.current = weights;
+
+  const fetchPlayers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const w = weightsRef.current;
+      const endpoint = w
+        ? `${API_URL}/api/players?weights=${JSON.stringify(w)}`
+        : `${API_URL}/api/players`;
+
+      const response = await axios.get(endpoint);
+      setPlayers(response.data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch players';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const endpoint = weights
-          ? `${API_URL}/api/players?weights=${JSON.stringify(weights)}`
-          : `${API_URL}/api/players`;
-
-        const response = await axios.get(endpoint);
-        setPlayers(response.data);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to fetch players';
-        setError(message);
-        console.error('Error fetching players:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPlayers();
-  }, [weights]);
+  }, [weights, fetchPlayers]);
 
-  return { players, loading, error };
+  return { players, loading, error, retry: fetchPlayers };
 };
 
 export interface DataMeta {

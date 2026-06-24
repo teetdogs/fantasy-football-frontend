@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Player } from '../../types';
 import './NameGenerator.css';
 
@@ -184,6 +184,8 @@ export function NameGenerator({ players }: Props) {
   const [names, setNames] = useState<string[]>([]);
   const [spinning, setSpinning] = useState(false);
   const [saved, setSaved] = useState<string[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
+  const recentRef = useRef<Set<string>>(new Set());
 
   const lastNames = useMemo(
     () => players.map((p) => p.name.split(' ').slice(-1)[0]),
@@ -200,8 +202,10 @@ export function NameGenerator({ players }: Props) {
     setTimeout(() => {
       const batch: string[] = [];
       const used = new Set<string>();
+      let attempts = 0;
 
-      while (batch.length < 5) {
+      while (batch.length < 5 && attempts < 50) {
+        attempts++;
         let name: string;
         if (vibe === 'funny') {
           if (matchedPuns.length > 0 && Math.random() < 0.6) {
@@ -213,11 +217,13 @@ export function NameGenerator({ players }: Props) {
         } else {
           name = pick(SERIOUS_TEMPLATES);
         }
-        if (!used.has(name)) {
+        if (!used.has(name) && !recentRef.current.has(name)) {
           used.add(name);
           batch.push(name);
         }
       }
+      if (recentRef.current.size > 20) recentRef.current.clear();
+      batch.forEach((n) => recentRef.current.add(n));
       setNames(batch);
       setSpinning(false);
     }, 400);
@@ -231,6 +237,8 @@ export function NameGenerator({ players }: Props) {
 
   const copyName = (name: string) => {
     navigator.clipboard.writeText(name);
+    setCopied(name);
+    setTimeout(() => setCopied(null), 1500);
   };
 
   return (
@@ -275,14 +283,20 @@ export function NameGenerator({ players }: Props) {
                   <span className="ng-name">{name}</span>
                   <div className="ng-actions">
                     <button
-                      className="ng-action-btn"
-                      title="Copy"
+                      className={'ng-action-btn' + (copied === name ? ' copied' : '')}
+                      title={copied === name ? 'Copied!' : 'Copy'}
                       onClick={() => copyName(name)}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" />
-                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                      </svg>
+                      {copied === name ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" />
+                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                        </svg>
+                      )}
                     </button>
                     <button
                       className={'ng-action-btn' + (isSaved ? ' saved' : '')}

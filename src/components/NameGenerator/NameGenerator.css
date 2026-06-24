@@ -132,6 +132,10 @@
   color: var(--danger);
   border-color: var(--danger);
 }
+.ng-action-btn.copied {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* Empty state */
 .ng-empty {

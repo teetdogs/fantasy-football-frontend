@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync } from './components';
 import { Projections } from './components/Projections/Projections';
@@ -29,15 +29,31 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]['id'];
 
+const SIDEBAR_TABS = new Set<TabId>(['table', 'projections']);
+
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('table');
   const [weights, setWeights] = useState<RankingWeights>(DEFAULT_WEIGHTS);
   const [positionFilter, setPositionFilter] = useState<string>('');
   const [search, setSearch] = useState('');
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const tabsRef = useRef<HTMLElement>(null);
 
-  const { players, loading, error } = useFetchPlayers(weights);
+  const { players, loading, error, retry } = useFetchPlayers(weights);
   const meta = useMeta();
+
+  const showSidebar = SIDEBAR_TABS.has(activeTab);
+  const showError = error && SIDEBAR_TABS.has(activeTab);
+
+  const switchTab = useCallback((id: TabId) => {
+    setActiveTab(id);
+    requestAnimationFrame(() => {
+      const nav = tabsRef.current;
+      if (!nav) return;
+      const active = nav.querySelector('.tab.active') as HTMLElement | null;
+      active?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+    });
+  }, []);
 
   const handleWeightChange = (key: keyof RankingWeights, value: number) => {
     const next = { ...weights, [key]: value / 100 };
@@ -89,8 +105,8 @@ function App() {
         </div>
       </header>
 
-      <div className="shell">
-        <aside className="panel">
+      <div className={showSidebar ? 'shell' : 'shell shell-full'}>
+        {showSidebar && <aside className="panel">
           <h3 className="panel-title">Find players</h3>
           <input
             className="search-input"
@@ -167,21 +183,22 @@ function App() {
               )}
             </div>
           )}
-        </aside>
+        </aside>}
 
         <main className="content">
-          {error && (
+          {showError && (
             <div className="banner">
               <strong>Can't reach the ranking service.</strong> {error}
+              <button className="banner-retry" onClick={retry}>Retry</button>
             </div>
           )}
 
-          <nav className="tabs">
+          <nav className="tabs" ref={tabsRef}>
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 className={activeTab === tab.id ? 'tab active' : 'tab'}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => switchTab(tab.id)}
               >
                 {tab.label}
               </button>
