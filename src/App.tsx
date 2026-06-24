@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
+import { useAuth } from './hooks/useAuth';
 import type { RankingWeights } from './types';
 import './App.css';
 
@@ -41,6 +42,8 @@ function App() {
 
   const { players, loading, error, retry } = useFetchPlayers(weights);
   const meta = useMeta();
+  const auth = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const showSidebar = SIDEBAR_TABS.has(activeTab);
   const showError = error && SIDEBAR_TABS.has(activeTab);
@@ -89,19 +92,52 @@ function App() {
           <span className="tag">BETA</span>
         </button>
 
-        <div className="topbar-meta">
-          <span className="meta-item">
-            <span className="dot" data-state={error ? 'error' : loading ? 'loading' : 'live'} />
-            {error ? 'Offline' : loading ? 'Syncing' : 'Live'}
-          </span>
-          <span className="meta-sep" />
-          <span className="meta-item tnum">{players.length} players</span>
-          <span className="meta-sep" />
-          <span className="meta-item">
-            {meta?.sources
-              ? meta.sources.map((s) => s === 'fantasyPros' ? 'FP' : s.charAt(0).toUpperCase() + s.slice(1)).join(' + ')
-              : '2026 season'}
-          </span>
+        <div className="topbar-right">
+          <div className="topbar-meta">
+            <span className="meta-item">
+              <span className="dot" data-state={error ? 'error' : loading ? 'loading' : 'live'} />
+              {error ? 'Offline' : loading ? 'Syncing' : 'Live'}
+            </span>
+            <span className="meta-sep" />
+            <span className="meta-item tnum">{players.length} players</span>
+            <span className="meta-sep" />
+            <span className="meta-item">
+              {meta?.sources
+                ? meta.sources.map((s) => s === 'fantasyPros' ? 'FP' : s.charAt(0).toUpperCase() + s.slice(1)).join(' + ')
+                : '2026 season'}
+            </span>
+          </div>
+
+          {auth.loading ? null : auth.user ? (
+            <div className="user-menu-wrap">
+              <button className="user-avatar-btn" onClick={() => setShowUserMenu((v) => !v)} title={auth.user.name}>
+                {auth.user.picture ? (
+                  <img src={auth.user.picture} alt="" className="user-avatar" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="user-initials">{auth.user.name.charAt(0)}</span>
+                )}
+              </button>
+              {showUserMenu && (
+                <div className="user-dropdown">
+                  <div className="user-dropdown-info">
+                    <span className="user-dropdown-name">{auth.user.name}</span>
+                    <span className="user-dropdown-email">{auth.user.email}</span>
+                  </div>
+                  <button className="user-dropdown-btn" onClick={() => { auth.logout(); setShowUserMenu(false); }}>
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button className="login-btn" onClick={auth.login}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Sign in
+            </button>
+          )}
         </div>
       </header>
 
