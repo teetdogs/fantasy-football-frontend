@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard } from './components';
 import { Projections } from './components/Projections/Projections';
-import { useFetchPlayers } from './hooks/useFetchPlayers';
+import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import type { RankingWeights } from './types';
 import './App.css';
 
@@ -35,6 +35,7 @@ function App() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const { players, loading, error } = useFetchPlayers(weights);
+  const meta = useMeta();
 
   const handleWeightChange = (key: keyof RankingWeights, value: number) => {
     const next = { ...weights, [key]: value / 100 };
@@ -77,7 +78,11 @@ function App() {
           <span className="meta-sep" />
           <span className="meta-item tnum">{players.length} players</span>
           <span className="meta-sep" />
-          <span className="meta-item">2026 season · ESPN</span>
+          <span className="meta-item">
+            {meta?.sources
+              ? meta.sources.map((s) => s === 'fantasyPros' ? 'FP' : s.charAt(0).toUpperCase() + s.slice(1)).join(' + ')
+              : '2026 season'}
+          </span>
         </div>
       </header>
 

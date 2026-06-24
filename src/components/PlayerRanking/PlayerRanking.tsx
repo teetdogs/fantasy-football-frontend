@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import type { RankingWeights } from '../../types';
-import type { Player } from '../../types';
+import type { RankingWeights, Player } from '../../types';
 import { useFetchPlayers } from '../../hooks/useFetchPlayers';
 import { PlayerCard } from '../PlayerCard/PlayerCard';
 import './PlayerRanking.css';
@@ -11,7 +10,7 @@ interface PlayerRankingProps {
   search?: string;
 }
 
-type SortField = 'rank' | 'adp' | 'projected_points' | 'score' | 'name';
+type SortField = 'consensusRank' | 'adp' | 'projected_points' | 'consensus' | 'name';
 
 const COLUMNS: {
   field: SortField | null;
@@ -20,37 +19,65 @@ const COLUMNS: {
   align?: 'right';
   tip?: string;
 }[] = [
-  { field: 'rank', label: '#', sortable: true, tip: 'Overall draft order — lower is better' },
+  { field: 'consensusRank', label: '#', sortable: true, tip: 'Consensus rank across all sources — lower is better' },
   { field: 'name', label: 'Player', sortable: true },
   { field: null, label: 'Pos', sortable: false },
-  { field: null, label: 'Team', sortable: false },
+  { field: null, label: 'Sources', sortable: false, tip: 'Which data sources contribute to this ranking' },
   {
     field: 'adp',
     label: 'Avg Draft Spot',
     sortable: true,
     align: 'right',
-    tip: 'On average, this is the pick number where this player gets drafted in other leagues',
+    tip: 'Where this player typically gets drafted (ESPN ADP)',
   },
   {
     field: 'projected_points',
     label: '2026 Pts',
     sortable: true,
     align: 'right',
-    tip: 'Total fantasy points he is projected to score this season (PPR)',
+    tip: 'Total fantasy points projected for this season (PPR)',
   },
   {
-    field: 'score',
-    label: 'Value',
+    field: 'consensus',
+    label: 'Consensus',
     sortable: true,
     align: 'right',
-    tip: 'Our overall draft value score (0–100), blending projection, draft spot, and position scarcity',
+    tip: 'Blended score from ESPN, FantasyPros experts, and Sleeper — higher is better',
   },
-  { field: null, label: 'Bye', sortable: false, align: 'right', tip: 'Week this player has off' },
+  { field: null, label: 'Bye', sortable: false, align: 'right', tip: 'Week off' },
 ];
+
+const INJURY_BADGE: Record<string, { label: string; cls: string }> = {
+  QUESTIONABLE: { label: 'Q', cls: 'inj-q' },
+  DOUBTFUL: { label: 'D', cls: 'inj-d' },
+  OUT: { label: 'O', cls: 'inj-o' },
+  INJURY_RESERVE: { label: 'IR', cls: 'inj-ir' },
+  SUSPENSION: { label: 'SUS', cls: 'inj-o' },
+  PHYSICALLY_UNABLE_TO_PERFORM: { label: 'PUP', cls: 'inj-o' },
+};
+
+function SourceDots({ player }: { player: Player }) {
+  const s = player.sources;
+  if (!s) return null;
+  return (
+    <span className="source-dots">
+      <span className="sdot sdot-espn" title={`ESPN rank: ${s.espn?.rank ?? '—'}`} />
+      {s.fantasyPros && (
+        <span
+          className="sdot sdot-fp"
+          title={`FantasyPros ECR: #${s.fantasyPros.ecr} (best ${s.fantasyPros.best}, worst ${s.fantasyPros.worst})`}
+        />
+      )}
+      {s.sleeper && (
+        <span className="sdot sdot-sl" title={`Sleeper ADP: ${s.sleeper.adp}`} />
+      )}
+    </span>
+  );
+}
 
 export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionFilter, search }) => {
   const { players, loading, error } = useFetchPlayers(weights);
-  const [sortField, setSortField] = useState<SortField>('rank');
+  const [sortField, setSortField] = useState<SortField>('consensusRank');
   const [sortAsc, setSortAsc] = useState(true);
   const [hoveredPlayer, setHoveredPlayer] = useState<Player | null>(null);
   const [cardPos, setCardPos] = useState({ x: 0, y: 0 });
@@ -63,49 +90,35 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   );
 
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {
-    const aVal = a[sortField] || 0;
-    const bVal = b[sortField] || 0;
+    const aVal = a[sortField as keyof Player] ?? (sortField === 'name' ? '' : 9999);
+    const bVal = b[sortField as keyof Player] ?? (sortField === 'name' ? '' : 9999);
     if (typeof aVal === 'string') {
       return sortAsc ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal);
     }
     return sortAsc ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
   });
 
-  const maxScore = Math.max(1, ...sortedPlayers.map((p) => p.score || 0));
+  const maxConsensus = Math.max(1, ...sortedPlayers.map((p) => p.consensus || 0));
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
     } else {
       setSortField(field);
-      setSortAsc(field === 'name' || field === 'rank' || field === 'adp');
+      setSortAsc(field === 'name' || field === 'consensusRank' || field === 'adp');
     }
   };
 
   const handlePlayerHover = (player: Player, e: React.MouseEvent) => {
-    // Get the viewport center and position card there
     const cardWidth = 280;
     const cardHeight = 440;
-
-    // Center horizontally in viewport
-    let x = (window.innerWidth - cardWidth) / 2;
-
-    // Get the row position to place card above it
+    const x = (window.innerWidth - cardWidth) / 2;
     const row = e.currentTarget as HTMLElement;
     const rowRect = row.getBoundingClientRect();
     let y = rowRect.top - cardHeight - 16;
-
-    // If not enough space above, put it below
-    if (y < 10) {
-      y = rowRect.bottom + 16;
-    }
-
+    if (y < 10) y = rowRect.bottom + 16;
     setHoveredPlayer(player);
     setCardPos({ x, y });
-  };
-
-  const handlePlayerLeave = () => {
-    setHoveredPlayer(null);
   };
 
   if (loading)
@@ -128,8 +141,8 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
         <div>
           <h2>Who to Draft</h2>
           <p className="card-sub">
-            Ranked best to worst for PPR leagues — just draft from the top down. Hover any player for
-            details.
+            Consensus ranking across ESPN, FantasyPros experts, and Sleeper — just draft from the top
+            down. Hover any player for details.
           </p>
         </div>
         <span className="count tnum">
@@ -160,38 +173,39 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
             </tr>
           </thead>
           <tbody>
-            {sortedPlayers.map((player) => (
-              <tr
-                key={player.id}
-                onMouseEnter={(e) => handlePlayerHover(player, e)}
-                onMouseLeave={handlePlayerLeave}
-              >
-                <td className="rank tnum">{player.rank ?? '—'}</td>
-                <td className="name">{player.name}</td>
-                <td>
-                  <span className="pos-badge" data-pos={player.position.toLowerCase()}>
-                    {player.position}
-                  </span>
-                </td>
-                <td className="team">{player.team || '—'}</td>
-                <td className="right tnum">
-                  {player.adp ? player.adp.toFixed(1) : '—'}
-                  {player.adp_floor && player.adp_ceiling && (
-                    <span className="sub tnum">
-                      {player.adp_floor.toFixed(0)}–{player.adp_ceiling.toFixed(0)}
+            {sortedPlayers.map((player) => {
+              const inj = INJURY_BADGE[player.injuryStatus || ''];
+              return (
+                <tr
+                  key={player.id}
+                  onMouseEnter={(e) => handlePlayerHover(player, e)}
+                  onMouseLeave={() => setHoveredPlayer(null)}
+                >
+                  <td className="rank tnum">{player.consensusRank ?? player.rank ?? '—'}</td>
+                  <td className="name">
+                    {player.name}
+                    {inj && <span className={`inj-badge ${inj.cls}`}>{inj.label}</span>}
+                  </td>
+                  <td>
+                    <span className="pos-badge" data-pos={player.position.toLowerCase()}>
+                      {player.position}
                     </span>
-                  )}
-                </td>
-                <td className="right tnum proj">{player.projected_points?.toFixed(1) ?? '—'}</td>
-                <td className="right score-cell">
-                  <span className="score-val tnum">{player.score?.toFixed(1) ?? '—'}</span>
-                  <span className="score-bar">
-                    <span style={{ width: `${((player.score || 0) / maxScore) * 100}%` }} />
-                  </span>
-                </td>
-                <td className="right bye tnum">{player.bye_week || '—'}</td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    <SourceDots player={player} />
+                  </td>
+                  <td className="right tnum">{player.adp ? player.adp.toFixed(1) : '—'}</td>
+                  <td className="right tnum proj">{player.projected_points?.toFixed(1) ?? '—'}</td>
+                  <td className="right score-cell">
+                    <span className="score-val tnum">{player.consensus?.toFixed(1) ?? '—'}</span>
+                    <span className="score-bar">
+                      <span style={{ width: `${((player.consensus || 0) / maxConsensus) * 100}%` }} />
+                    </span>
+                  </td>
+                  <td className="right bye tnum">{player.bye_week || '—'}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

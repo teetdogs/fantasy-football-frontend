@@ -18,7 +18,6 @@ const POSITION_COLORS: Record<string, string> = {
 const FALLBACK_IMG =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"%3E%3Crect fill="%231c2638" width="120" height="160"/%3E%3Ccircle cx="60" cy="45" r="20" fill="%235e6b82"/%3E%3Cpath d="M30 80c0-17 13-30 30-30s30 13 30 30v35H30Z" fill="%235e6b82"/%3E%3C/svg%3E';
 
-// Position-aware stat lines pulled from the real last-season totals.
 function statLines(pos: string, s: LastSeasonStats): { label: string; value: string }[] {
   switch (pos) {
     case 'QB':
@@ -39,7 +38,7 @@ function statLines(pos: string, s: LastSeasonStats): { label: string; value: str
         { label: 'Rec Yds', value: `${s.recYds}` },
         { label: 'Rec TD', value: `${s.recTd}` },
       ];
-    default: // WR / TE
+    default:
       return [
         { label: 'Rec', value: `${s.rec}` },
         { label: 'Targets', value: `${s.tgt}` },
@@ -54,6 +53,8 @@ function statLines(pos: string, s: LastSeasonStats): { label: string; value: str
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, position }) => {
   const color = POSITION_COLORS[player.position] || '#93a1b8';
   const ls = player.lastSeason;
+  const s = player.sources;
+  const fp = s?.fantasyPros;
 
   return (
     <div
@@ -82,25 +83,44 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, position }) => {
           </span>
         </div>
 
-        {/* Draft inputs */}
+        {/* Multi-source consensus */}
         <div className="card-stats">
           <div className="stat">
-            <span className="stat-label">Rank</span>
-            <span className="stat-val tnum">#{player.rank || '—'}</span>
+            <span className="stat-label">Consensus</span>
+            <span className="stat-val tnum">#{player.consensusRank || '—'}</span>
           </div>
           <div className="stat">
-            <span className="stat-label">ADP</span>
+            <span className="stat-label">ESPN ADP</span>
             <span className="stat-val tnum">{player.adp?.toFixed(1) || '—'}</span>
           </div>
           <div className="stat">
-            <span className="stat-label">Proj</span>
+            <span className="stat-label">2026 Pts</span>
             <span className="stat-val tnum">{player.projected_points?.toFixed(1) || '—'}</span>
           </div>
-          <div className="stat">
-            <span className="stat-label">Score</span>
-            <span className="stat-val score tnum">{player.score?.toFixed(1) || '—'}</span>
-          </div>
+          {fp && (
+            <div className="stat">
+              <span className="stat-label">Expert ECR</span>
+              <span className="stat-val tnum">#{fp.ecr}</span>
+            </div>
+          )}
         </div>
+
+        {/* Expert range */}
+        {fp && (
+          <div className="card-expert-range">
+            <span className="range-label">Expert range</span>
+            <span className="range-val tnum">#{fp.best} – #{fp.worst}</span>
+            <span className="range-tier">Tier {fp.tier}</span>
+          </div>
+        )}
+
+        {/* Season outlook from ESPN */}
+        {player.seasonOutlook && (
+          <div className="card-outlook">
+            <span className="outlook-title">2026 Outlook</span>
+            <p className="outlook-text">{player.seasonOutlook}</p>
+          </div>
+        )}
 
         {/* Real last-season production */}
         {ls ? (

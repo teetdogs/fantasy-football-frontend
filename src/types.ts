@@ -33,6 +33,32 @@ export interface ProjectedStats {
   recTd?: number;
 }
 
+export interface SourceEspn {
+  adp: number | null;
+  rank: number | null;
+  projPts: number | null;
+}
+
+export interface SourceSleeper {
+  adp: number | null;
+  projPts: number | null;
+}
+
+export interface SourceFantasyPros {
+  ecr: number;
+  best: number;
+  worst: number;
+  avg: number | null;
+  tier: number;
+  posRank: string;
+}
+
+export interface PlayerSources {
+  espn: SourceEspn | null;
+  sleeper: SourceSleeper | null;
+  fantasyPros: SourceFantasyPros | null;
+}
+
 export interface Player {
   id: number;
   name: string;
@@ -49,6 +75,13 @@ export interface Player {
   imageUrl?: string;
   lastSeason?: LastSeasonStats | null;
   projection?: ProjectedStats | null;
+  sources?: PlayerSources;
+  consensus?: number | null;
+  consensusRank?: number;
+  signalCount?: number;
+  injuryStatus?: string;
+  seasonOutlook?: string | null;
+  espnRank?: number | null;
 }
 
 export interface RankingWeights {

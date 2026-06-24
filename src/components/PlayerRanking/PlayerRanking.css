@@ -155,3 +155,50 @@
   border-radius: 999px;
   background: linear-gradient(90deg, var(--accent-2), var(--accent));
 }
+
+/* Source dots — colored indicators showing which sources rate this player */
+.source-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.sdot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  cursor: help;
+}
+.sdot-espn {
+  background: var(--pos-qb);
+}
+.sdot-fp {
+  background: var(--pos-wr);
+}
+.sdot-sl {
+  background: var(--pos-te);
+}
+
+/* Injury badges */
+.inj-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+.inj-q {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--warning);
+}
+.inj-d {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--danger);
+}
+.inj-o, .inj-ir {
+  background: rgba(248, 113, 113, 0.22);
+  color: var(--danger);
+}

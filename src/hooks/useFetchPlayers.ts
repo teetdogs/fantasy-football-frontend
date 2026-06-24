@@ -35,6 +35,26 @@ export const useFetchPlayers = (weights?: RankingWeights) => {
   return { players, loading, error };
 };
 
+export interface DataMeta {
+  source: string | null;
+  sources: string[];
+  count: number;
+  fetchedAt: string | null;
+}
+
+export const useMeta = () => {
+  const [meta, setMeta] = useState<DataMeta | null>(null);
+
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/health`)
+      .then((res) => setMeta(res.data?.data || null))
+      .catch(() => {});
+  }, []);
+
+  return meta;
+};
+
 export const useFetchRankings = (strategyName?: string) => {
   const [rankings, setRankings] = useState<Record<string, Player[]>>({});
   const [loading, setLoading] = useState(false);

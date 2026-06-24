@@ -189,7 +189,13 @@ export const Projections: React.FC<ProjectionsProps> = ({ players, positionFilte
                     </tr>
                   </tbody>
                 </table>
-                <p className="proj-takeaway">{takeaway(p)}</p>
+                {p.seasonOutlook ? (
+                  <div className="proj-outlook">
+                    <strong>2026 Outlook:</strong> {p.seasonOutlook}
+                  </div>
+                ) : (
+                  <p className="proj-takeaway">{takeaway(p)}</p>
+                )}
               </div>
             </div>
           );
