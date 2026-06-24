@@ -55,7 +55,7 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" role="button" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => setActiveTab('table')}>
           <span className="brand-mark" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z" fill="currentColor" opacity="0.25" />
