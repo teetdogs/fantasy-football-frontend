@@ -101,3 +101,52 @@ export interface ApiResponse<T> {
   error?: string;
   status: number;
 }
+
+export interface LeagueRosterSlot {
+  position: string;
+  count: number;
+}
+
+export interface LeagueScoring {
+  passYds?: number;
+  passTd?: number;
+  int?: number;
+  rushYds?: number;
+  rushTd?: number;
+  recYds?: number;
+  recTd?: number;
+  rec?: number;
+}
+
+export interface LeagueDraft {
+  type: string;
+  date: string | null;
+  rounds: number;
+}
+
+export interface LeagueSettings {
+  leagueId: number;
+  name: string;
+  size: number;
+  season: number;
+  isPublic: boolean;
+  rosterSlots: LeagueRosterSlot[];
+  scoring: LeagueScoring;
+  scoringFormat: string;
+  draft: LeagueDraft;
+}
+
+export interface LeagueTeam {
+  teamId: number;
+  name: string;
+  abbrev: string;
+  owner: string;
+  record: { wins: number; losses: number; ties: number } | null;
+  draftPosition: number | null;
+}
+
+export interface LeagueCredentials {
+  leagueId: string;
+  swid: string;
+  espnS2: string;
+}
