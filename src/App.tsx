@@ -55,12 +55,13 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand" role="button" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => setActiveTab('table')}>
+        <button className="brand" onClick={() => { setActiveTab('table'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
           <span className="brand-mark" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z" fill="currentColor" opacity="0.25" />
-              <path d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M9.5 12h5M12 10v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <ellipse cx="12" cy="12" rx="10" ry="6.5" transform="rotate(-30 12 12)" fill="currentColor" opacity="0.25" />
+              <ellipse cx="12" cy="12" rx="10" ry="6.5" transform="rotate(-30 12 12)" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M7 17L17 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              <path d="M9.5 14.5l1.5-1.5M12 12l1.5-1.5M14.5 9.5l1-1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
             </svg>
           </span>
           <div className="brand-text">
@@ -68,7 +69,7 @@ function App() {
             <span className="brand-sub">Fantasy Football</span>
           </div>
           <span className="tag">BETA</span>
-        </div>
+        </button>
 
         <div className="topbar-meta">
           <span className="meta-item">
