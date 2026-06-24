@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync } from './components';
 import { Projections } from './components/Projections/Projections';
@@ -44,6 +44,19 @@ function App() {
   const meta = useMeta();
   const auth = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close the user dropdown when clicking outside it.
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const onClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [showUserMenu]);
 
   const showSidebar = SIDEBAR_TABS.has(activeTab);
   const showError = error && SIDEBAR_TABS.has(activeTab);
@@ -109,7 +122,7 @@ function App() {
           </div>
 
           {auth.loading ? null : auth.user ? (
-            <div className="user-menu-wrap">
+            <div className="user-menu-wrap" ref={userMenuRef}>
               <button className="user-avatar-btn" onClick={() => setShowUserMenu((v) => !v)} title={auth.user.name}>
                 {auth.user.picture ? (
                   <img src={auth.user.picture} alt="" className="user-avatar" referrerPolicy="no-referrer" />
