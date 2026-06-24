@@ -360,13 +360,19 @@
 }
 
 .tabs {
-  display: inline-flex;
+  display: flex;
   gap: 2px;
   padding: 4px;
   margin-bottom: 18px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -377,6 +383,8 @@
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.15s;
 }
 .tab:hover {
