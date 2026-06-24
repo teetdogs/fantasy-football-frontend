@@ -10,10 +10,57 @@
   max-width: 640px;
 }
 
+/* ====== Mode tabs ====== */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.mode-tab {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mode-tab:hover {
+  border-color: var(--border-strong);
+}
+.mode-tab.active {
+  background: var(--surface-3);
+  border-color: var(--accent);
+}
+.mode-tab-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.mode-tab.active .mode-tab-label {
+  color: var(--accent);
+}
+.mode-tab-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.mode-body {
+  min-height: 200px;
+}
+
+/* ====== Roster grid (starters mode) ====== */
 .roster {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
+  margin-bottom: 18px;
 }
 
 .slot {
@@ -25,6 +72,8 @@
 }
 .slot:hover {
   border-color: var(--border-strong);
+}
+.slot.filled:hover {
   transform: translateY(-2px);
 }
 
@@ -32,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .slot-no {
@@ -59,14 +108,23 @@
 .slot-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   font-size: 11.5px;
   color: var(--text-dim);
   font-weight: 600;
 }
 
-.slot-score {
-  color: var(--accent);
+.slot-clear {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.slot-clear:hover {
+  color: var(--danger);
 }
 
 .slot-body.empty {
@@ -77,7 +135,442 @@
   font-style: italic;
 }
 
-/* FLEX badge color (other positions defined alongside .pos-badge) */
 .pos-badge[data-pos='flex'] {
   --pos: var(--pos-flex);
+}
+
+/* ====== Player picker ====== */
+.picker {
+  position: relative;
+}
+
+.picker-input {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  outline: none;
+}
+.picker-input::placeholder {
+  color: var(--text-dim);
+}
+.picker-input:focus {
+  border-color: var(--accent);
+}
+
+.picker-drop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-md);
+  margin-top: 4px;
+}
+
+.picker-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+.picker-opt:last-child {
+  border-bottom: none;
+}
+.picker-opt:hover {
+  background: var(--surface-2);
+}
+
+.picker-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-team {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.picker-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+/* ====== Grade display ====== */
+.grade-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.grade-btn {
+  padding: 10px 22px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--r-sm);
+  transition: opacity 0.15s;
+}
+.grade-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.grade-btn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+.grade-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px;
+  margin-top: 12px;
+}
+
+.grade-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid;
+}
+
+.grade-letter {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.grade-score {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.grade-summary {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.grade-positions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.grade-pos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grade-pos-letter {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.grade-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grade-pick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--r-xs);
+  font-size: 12.5px;
+}
+.grade-pick.steal {
+  background: rgba(52, 211, 153, 0.08);
+}
+.grade-pick.reach {
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.gp-num {
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 28px;
+}
+.gp-name {
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+.gp-pos {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.gp-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.tag-steal {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--accent);
+}
+.tag-reach {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--danger);
+}
+.tag-fair {
+  background: var(--surface-3);
+  color: var(--text-dim);
+}
+
+/* ====== Rankings mode ====== */
+.rank-add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.rank-add-row .picker {
+  flex: 1;
+}
+
+.rank-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  cursor: grab;
+  transition: background 0.1s, opacity 0.1s;
+}
+.rank-row:hover {
+  background: var(--surface-3);
+}
+.rank-row.dragging {
+  opacity: 0.5;
+}
+
+.rank-grip {
+  color: var(--text-dim);
+  font-size: 14px;
+  cursor: grab;
+  user-select: none;
+}
+
+.rank-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 22px;
+  text-align: right;
+}
+
+.rank-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-team {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.rank-diff {
+  font-size: 11px;
+  font-weight: 700;
+  width: 36px;
+  text-align: right;
+}
+.val-up {
+  color: var(--accent);
+}
+.val-down {
+  color: var(--danger);
+}
+
+.rank-rm {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.rank-rm:hover {
+  color: var(--danger);
+}
+
+/* ====== Mock draft mode ====== */
+.mock-setup {
+  text-align: center;
+  padding: 30px 0;
+}
+.mock-setup-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.mock-fields {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.mock-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.mock-fields select {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.mock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mock-info {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mock-round {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.mock-pick, .mock-slot {
+  color: var(--text-dim);
+}
+
+.mock-board {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 720px) {
+  .mock-board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mock-your-picks h4,
+.mock-available h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.mock-pick-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.mock-avail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mock-avail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s, border-color 0.15s;
+}
+.mock-avail-row:hover {
+  background: var(--surface-3);
+  border-color: var(--accent);
+}
+
+.mock-pts {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-left: auto;
 }
