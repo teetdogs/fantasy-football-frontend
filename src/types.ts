@@ -17,6 +17,22 @@ export interface LastSeasonStats {
   ppg: number;
 }
 
+export interface ProjectedStats {
+  fpts: number | null;
+  comp?: number;
+  att?: number;
+  passYds?: number;
+  passTd?: number;
+  int?: number;
+  car?: number;
+  rushYds?: number;
+  rushTd?: number;
+  rec?: number;
+  tgt?: number;
+  recYds?: number;
+  recTd?: number;
+}
+
 export interface Player {
   id: number;
   name: string;
@@ -32,6 +48,7 @@ export interface Player {
   rank?: number;
   imageUrl?: string;
   lastSeason?: LastSeasonStats | null;
+  projection?: ProjectedStats | null;
 }
 
 export interface RankingWeights {

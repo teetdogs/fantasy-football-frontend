@@ -1,0 +1,152 @@
+.proj-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.proj-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.proj-row {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.proj-row:last-child {
+  border-bottom: none;
+}
+
+/* Player identity column */
+.proj-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.proj-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.proj-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.proj-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proj-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.proj-pos {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Stat table */
+.proj-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.proj-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.proj-table th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.proj-table th.right,
+.proj-table td.right {
+  text-align: right;
+}
+
+.proj-table td {
+  padding: 5px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.proj-table .rowlabel {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stat-row td {
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.proj-stat-row td {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* FPTS column (last) gets the accent */
+.proj-table tr td:last-child,
+.proj-table tr th:last-child {
+  color: var(--accent);
+}
+.stat-row td:last-child {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text-muted));
+}
+
+.proj-takeaway {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .proj-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

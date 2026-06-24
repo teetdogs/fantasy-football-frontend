@@ -126,9 +126,21 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
+.card-head {
+  align-items: flex-start;
+}
+
 .card-head h2 {
   font-size: 15px;
   font-weight: 700;
+}
+
+.card-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+  max-width: 520px;
 }
 
 .card-head .count {

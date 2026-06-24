@@ -43,6 +43,13 @@
   vertical-align: middle;
 }
 
+.th-info {
+  margin-left: 4px;
+  font-size: 9px;
+  color: var(--text-dim);
+  cursor: help;
+}
+
 .ranking-table tbody td {
   padding: 11px 14px;
   font-size: 13.5px;

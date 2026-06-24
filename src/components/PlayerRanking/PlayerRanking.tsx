@@ -8,31 +8,59 @@ import './PlayerRanking.css';
 interface PlayerRankingProps {
   weights?: RankingWeights;
   positionFilter?: string;
+  search?: string;
 }
 
 type SortField = 'rank' | 'adp' | 'projected_points' | 'score' | 'name';
 
-const COLUMNS: { field: SortField | null; label: string; sortable: boolean; align?: 'right' }[] = [
-  { field: 'rank', label: 'Rk', sortable: true },
+const COLUMNS: {
+  field: SortField | null;
+  label: string;
+  sortable: boolean;
+  align?: 'right';
+  tip?: string;
+}[] = [
+  { field: 'rank', label: '#', sortable: true, tip: 'Overall draft order — lower is better' },
   { field: 'name', label: 'Player', sortable: true },
   { field: null, label: 'Pos', sortable: false },
   { field: null, label: 'Team', sortable: false },
-  { field: 'adp', label: 'ADP', sortable: true, align: 'right' },
-  { field: 'projected_points', label: 'Proj', sortable: true, align: 'right' },
-  { field: 'score', label: 'Score', sortable: true, align: 'right' },
-  { field: null, label: 'Bye', sortable: false, align: 'right' },
+  {
+    field: 'adp',
+    label: 'Avg Draft Spot',
+    sortable: true,
+    align: 'right',
+    tip: 'On average, this is the pick number where this player gets drafted in other leagues',
+  },
+  {
+    field: 'projected_points',
+    label: '2026 Pts',
+    sortable: true,
+    align: 'right',
+    tip: 'Total fantasy points he is projected to score this season (PPR)',
+  },
+  {
+    field: 'score',
+    label: 'Value',
+    sortable: true,
+    align: 'right',
+    tip: 'Our overall draft value score (0–100), blending projection, draft spot, and position scarcity',
+  },
+  { field: null, label: 'Bye', sortable: false, align: 'right', tip: 'Week this player has off' },
 ];
 
-export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionFilter }) => {
+export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionFilter, search }) => {
   const { players, loading, error } = useFetchPlayers(weights);
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortAsc, setSortAsc] = useState(true);
   const [hoveredPlayer, setHoveredPlayer] = useState<Player | null>(null);
   const [cardPos, setCardPos] = useState({ x: 0, y: 0 });
 
-  const filteredPlayers = positionFilter
-    ? players.filter((p) => p.position === positionFilter)
-    : players;
+  const query = (search || '').trim().toLowerCase();
+  const filteredPlayers = players.filter(
+    (p) =>
+      (!positionFilter || p.position === positionFilter) &&
+      (!query || p.name.toLowerCase().includes(query))
+  );
 
   const sortedPlayers = [...filteredPlayers].sort((a, b) => {
     const aVal = a[sortField] || 0;
@@ -97,7 +125,13 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
   return (
     <div className="card">
       <div className="card-head">
-        <h2>Player Rankings</h2>
+        <div>
+          <h2>Who to Draft</h2>
+          <p className="card-sub">
+            Ranked best to worst for PPR leagues — just draft from the top down. Hover any player for
+            details.
+          </p>
+        </div>
         <span className="count tnum">
           {sortedPlayers.length} {positionFilter || 'players'}
         </span>
@@ -110,12 +144,14 @@ export const PlayerRanking: React.FC<PlayerRankingProps> = ({ weights, positionF
               {COLUMNS.map((col) => (
                 <th
                   key={col.label}
+                  title={col.tip}
                   className={[col.sortable ? 'sortable' : '', col.align === 'right' ? 'right' : '']
                     .join(' ')
                     .trim()}
                   onClick={col.sortable && col.field ? () => handleSort(col.field as SortField) : undefined}
                 >
                   {col.label}
+                  {col.tip && <span className="th-info" aria-hidden="true">ⓘ</span>}
                   {col.field && sortField === col.field && (
                     <span className="sort-ind">{sortAsc ? '▲' : '▼'}</span>
                   )}

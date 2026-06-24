@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { PlayerRanking, TierVisualizer, DraftBoard } from './components';
+import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers } from './hooks/useFetchPlayers';
 import type { RankingWeights } from './types';
 import './App.css';
@@ -12,13 +13,14 @@ const DEFAULT_WEIGHTS: RankingWeights = {
 };
 
 const WEIGHT_META: { key: keyof RankingWeights; label: string; hint: string; color: string }[] = [
-  { key: 'adpWeight', label: 'ADP', hint: 'Market consensus draft position', color: 'var(--pos-wr)' },
-  { key: 'projectionWeight', label: 'Projection', hint: 'Projected fantasy points', color: 'var(--accent)' },
-  { key: 'positionScarcityWeight', label: 'Scarcity', hint: 'Value depth at the position', color: 'var(--pos-te)' },
+  { key: 'adpWeight', label: 'Where others draft him', hint: 'Average draft position (ADP)', color: 'var(--pos-wr)' },
+  { key: 'projectionWeight', label: 'Projected points', hint: 'Expected 2026 fantasy points', color: 'var(--accent)' },
+  { key: 'positionScarcityWeight', label: 'Position scarcity', hint: 'How thin the talent is at the spot', color: 'var(--pos-te)' },
 ];
 
 const TABS = [
-  { id: 'table', label: 'Rankings' },
+  { id: 'table', label: 'Who to Draft' },
+  { id: 'projections', label: 'Projections' },
   { id: 'tiers', label: 'Tiers' },
   { id: 'board', label: 'Draft Board' },
 ] as const;
@@ -29,6 +31,8 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabId>('table');
   const [weights, setWeights] = useState<RankingWeights>(DEFAULT_WEIGHTS);
   const [positionFilter, setPositionFilter] = useState<string>('');
+  const [search, setSearch] = useState('');
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const { players, loading, error } = useFetchPlayers(weights);
 
@@ -53,16 +57,8 @@ function App() {
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z"
-                fill="currentColor"
-                opacity="0.25"
-              />
-              <path
-                d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
+              <path d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z" fill="currentColor" opacity="0.25" />
+              <path d="M5 12c0-3.5 3-6.5 7-6.5s7 3 7 6.5-3 6.5-7 6.5-7-3-7-6.5Z" stroke="currentColor" strokeWidth="1.5" />
               <path d="M9.5 12h5M12 10v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </span>
@@ -87,41 +83,14 @@ function App() {
 
       <div className="shell">
         <aside className="panel">
-          <div className="panel-head">
-            <h3>Ranking Model</h3>
-            {!isDefault && (
-              <button className="link-btn" onClick={() => setWeights(DEFAULT_WEIGHTS)}>
-                Reset
-              </button>
-            )}
-          </div>
-          <p className="panel-desc">Blend the inputs that drive each player's score.</p>
-
-          {WEIGHT_META.map(({ key, label, hint, color }) => (
-            <div className="weight" key={key}>
-              <div className="weight-top">
-                <span className="weight-label">{label}</span>
-                <span className="weight-val tnum">{Math.round(weights[key] * 100)}%</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={Math.round(weights[key] * 100)}
-                style={{ '--track': color } as CSSProperties}
-                onChange={(e) => handleWeightChange(key, parseInt(e.target.value))}
-              />
-              <span className="weight-hint">{hint}</span>
-            </div>
-          ))}
-
-          <div className="mix-bar" aria-hidden="true">
-            {WEIGHT_META.map(({ key, color }) => (
-              <span key={key} style={{ width: `${weights[key] * 100}%`, background: color }} />
-            ))}
-          </div>
-
-          <div className="panel-divider" />
+          <h3 className="panel-title">Find players</h3>
+          <input
+            className="search-input"
+            type="search"
+            placeholder="Search by name…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
           <h4 className="panel-subhead">Position</h4>
           <div className="chips">
@@ -139,6 +108,57 @@ function App() {
               </button>
             ))}
           </div>
+
+          <div className="scoring-note">
+            <span className="scoring-dot" /> PPR scoring
+          </div>
+
+          <div className="panel-divider" />
+
+          {/* Advanced: ranking model tuning, hidden by default */}
+          <button
+            className="advanced-toggle"
+            onClick={() => setAdvancedOpen((v) => !v)}
+            aria-expanded={advancedOpen}
+          >
+            <span className={advancedOpen ? 'caret open' : 'caret'}>▸</span>
+            Advanced: customize ranking
+          </button>
+
+          {advancedOpen && (
+            <div className="advanced-body">
+              <p className="panel-desc">
+                The list is already tuned for you. Adjust only if you want to weight things yourself.
+              </p>
+              {WEIGHT_META.map(({ key, label, hint, color }) => (
+                <div className="weight" key={key}>
+                  <div className="weight-top">
+                    <span className="weight-label">{label}</span>
+                    <span className="weight-val tnum">{Math.round(weights[key] * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={Math.round(weights[key] * 100)}
+                    style={{ '--track': color } as CSSProperties}
+                    onChange={(e) => handleWeightChange(key, parseInt(e.target.value))}
+                  />
+                  <span className="weight-hint">{hint}</span>
+                </div>
+              ))}
+              <div className="mix-bar" aria-hidden="true">
+                {WEIGHT_META.map(({ key, color }) => (
+                  <span key={key} style={{ width: `${weights[key] * 100}%`, background: color }} />
+                ))}
+              </div>
+              {!isDefault && (
+                <button className="link-btn reset-row" onClick={() => setWeights(DEFAULT_WEIGHTS)}>
+                  Reset to recommended
+                </button>
+              )}
+            </div>
+          )}
         </aside>
 
         <main className="content">
@@ -161,7 +181,12 @@ function App() {
           </nav>
 
           <div className="tab-panel">
-            {activeTab === 'table' && <PlayerRanking weights={weights} positionFilter={positionFilter} />}
+            {activeTab === 'table' && (
+              <PlayerRanking weights={weights} positionFilter={positionFilter} search={search} />
+            )}
+            {activeTab === 'projections' && (
+              <Projections players={players} positionFilter={positionFilter} search={search} loading={loading} />
+            )}
             {activeTab === 'tiers' && <TierVisualizer players={players} loading={loading} />}
             {activeTab === 'board' && <DraftBoard players={players} />}
           </div>
