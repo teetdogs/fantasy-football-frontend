@@ -8,9 +8,13 @@ interface DraftBoardProps {
 export const DraftBoard: React.FC<DraftBoardProps> = ({ players }) => {
   const positions = ['QB', 'RB', 'RB', 'WR', 'WR', 'WR', 'TE', 'FLEX', 'K', 'DEF'];
 
+  const used = new Set<number>();
+
   const getTopPlayerByPosition = (pos: string) => {
     const searchPos = pos === 'FLEX' ? ['RB', 'WR', 'TE'] : [pos];
-    return players.find((p) => searchPos.includes(p.position) && (p.rank || 999) <= 50);
+    const pick = players.find((p) => searchPos.includes(p.position) && !used.has(p.id));
+    if (pick) used.add(pick.id);
+    return pick;
   };
 
   return (
@@ -39,8 +43,8 @@ export const DraftBoard: React.FC<DraftBoardProps> = ({ players }) => {
                   <div className="slot-body">
                     <span className="slot-name">{player.name}</span>
                     <span className="slot-meta">
-                      <span className="tnum">#{player.rank}</span>
-                      <span className="slot-score tnum">{player.score?.toFixed(1)}</span>
+                      <span className="tnum">#{player.consensusRank || player.rank}</span>
+                      <span className="slot-score tnum">{player.consensus?.toFixed(1) || player.score?.toFixed(1)}</span>
                     </span>
                   </div>
                 ) : (
