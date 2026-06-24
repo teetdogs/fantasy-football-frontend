@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { PlayerRanking, TierVisualizer, DraftBoard } from './components';
+import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import type { RankingWeights } from './types';
@@ -23,6 +23,7 @@ const TABS = [
   { id: 'projections', label: 'Projections' },
   { id: 'tiers', label: 'Tiers' },
   { id: 'board', label: 'Draft Board' },
+  { id: 'names', label: 'Team Names' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -195,6 +196,7 @@ function App() {
             )}
             {activeTab === 'tiers' && <TierVisualizer players={players} loading={loading} />}
             {activeTab === 'board' && <DraftBoard players={players} />}
+            {activeTab === 'names' && <NameGenerator players={players} />}
           </div>
         </main>
       </div>
