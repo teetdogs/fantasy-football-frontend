@@ -51,11 +51,23 @@ function getRound(overall: number, numTeams: number): number {
 
 const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
 
+// ——— Read connected league from localStorage ———
+function loadLeague(): { size: number; rounds: number } | null {
+  try {
+    const raw = localStorage.getItem('draftlab_league');
+    if (!raw) return null;
+    const { settings } = JSON.parse(raw);
+    if (!settings?.size) return null;
+    return { size: settings.size, rounds: settings.draft?.rounds || 15 };
+  } catch { return null; }
+}
+
 // ——— Setup Screen ———
 function Setup({ onStart }: { onStart: (slot: number, teams: number, rounds: number) => void }) {
+  const league = loadLeague();
   const [slot, setSlot] = useState(1);
-  const [teams, setTeams] = useState(12);
-  const [rounds, setRounds] = useState(15);
+  const [teams, setTeams] = useState(league?.size || 12);
+  const [rounds, setRounds] = useState(league?.rounds || 15);
 
   return (
     <div className="dd-setup">
@@ -71,11 +83,17 @@ function Setup({ onStart }: { onStart: (slot: number, teams: number, rounds: num
         AI-powered recommendations for every one of your picks.
       </p>
 
+      {league && (
+        <div className="dd-league-detected">
+          Pre-filled from your connected league ({league.size} teams, {league.rounds} rounds)
+        </div>
+      )}
+
       <div className="dd-setup-fields">
         <label>
           <span>Your draft position</span>
           <select value={slot} onChange={(e) => setSlot(+e.target.value)}>
-            {Array.from({ length: 14 }, (_, i) => (
+            {Array.from({ length: teams }, (_, i) => (
               <option key={i + 1} value={i + 1}>Pick #{i + 1}</option>
             ))}
           </select>

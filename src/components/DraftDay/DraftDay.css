@@ -25,6 +25,17 @@
   margin-bottom: 28px;
 }
 
+.dd-league-detected {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(52, 211, 153, 0.08);
+  padding: 8px 16px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
 .dd-setup-fields {
   display: flex;
   gap: 16px;
