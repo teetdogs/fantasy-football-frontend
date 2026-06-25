@@ -321,9 +321,7 @@ export function DraftDay({ players }: DraftDayProps) {
   // Sync mode state
   const [syncMode, setSyncMode] = useState(false);
   const [syncTeamId, setSyncTeamId] = useState<number>(0);
-  const [syncTeams, setSyncTeams] = useState<EspnTeam[]>([]);
   const [syncStatus, setSyncStatus] = useState<'polling' | 'error' | 'done'>('polling');
-  const [teamSlotMap, setTeamSlotMap] = useState<Map<number, number>>(new Map());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentOverall = picks.length + 1;
@@ -415,7 +413,6 @@ export function DraftDay({ players }: DraftDayProps) {
             slotMap.set(p.teamId, p.pick);
           }
         }
-        setTeamSlotMap(slotMap);
 
         // Derive user's slot from their teamId
         const userSlot = slotMap.get(syncTeamId);
@@ -456,9 +453,8 @@ export function DraftDay({ players }: DraftDayProps) {
     setStarted(true);
   };
 
-  const handleStartSync = (teamId: number, teams: EspnTeam[], leagueSize: number, rounds: number) => {
+  const handleStartSync = (teamId: number, _teams: EspnTeam[], leagueSize: number, rounds: number) => {
     setSyncTeamId(teamId);
-    setSyncTeams(teams);
     setNumTeams(leagueSize);
     setNumRounds(rounds);
     setSyncMode(true);
