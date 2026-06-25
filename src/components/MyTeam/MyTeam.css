@@ -1,0 +1,221 @@
+/* ====== Empty state ====== */
+.mt-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.mt-empty h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.mt-empty p {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+/* ====== Team select ====== */
+.mt-team-select {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  max-width: 260px;
+}
+
+/* ====== Tabs ====== */
+.mt-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mt-tab {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.mt-tab:hover {
+  color: var(--text);
+}
+
+.mt-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ====== Body ====== */
+.mt-body {
+  padding: 16px 18px;
+}
+
+.mt-section {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  margin-top: 18px;
+}
+
+.mt-section:first-child {
+  margin-top: 0;
+}
+
+.mt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mt-note {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.mt-error {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--danger);
+  padding: 8px 12px;
+  background: rgba(248, 113, 113, 0.08);
+  border-radius: var(--r-xs);
+}
+
+/* ====== Player row ====== */
+.mt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-xs);
+  font-size: 12.5px;
+  transition: background 0.1s;
+}
+
+.mt-row:hover {
+  background: var(--surface-3);
+}
+
+.mt-row.bench {
+  opacity: 0.65;
+}
+
+.mt-name {
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-team {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.mt-bye {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  background: var(--surface-3);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.mt-injury {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--danger);
+  background: rgba(248, 113, 113, 0.1);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.mt-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  width: 40px;
+  text-align: right;
+}
+
+.mt-pts {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  width: 55px;
+  text-align: right;
+}
+
+/* ====== Waiver suggestions ====== */
+.mt-waiver {
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 6px;
+  transition: border-color 0.15s;
+}
+
+.mt-waiver:hover {
+  border-color: var(--accent);
+}
+
+.mt-waiver-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.mt-owned {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.mt-waiver-reason {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 3px 0;
+}
+
+/* ====== Drop candidates ====== */
+.mt-surplus {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(52, 211, 153, 0.1);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.mt-drops-hint {
+  margin-bottom: 8px;
+}

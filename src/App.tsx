@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CSSProperties } from 'react';
-import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync, DraftDay } from './components';
+import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync, DraftDay, MyTeam } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import { useAuth } from './hooks/useAuth';
@@ -26,6 +26,7 @@ const TABS = [
   { id: 'board', label: 'Draft Board' },
   { id: 'names', label: 'Team Names' },
   { id: 'league', label: 'My League' },
+  { id: 'myteam', label: 'My Team' },
   { id: 'draftday', label: 'Draft Day' },
 ] as const;
 
@@ -266,6 +267,7 @@ function App() {
             {activeTab === 'board' && <DraftBoard players={players} />}
             {activeTab === 'names' && <NameGenerator players={players} />}
             {activeTab === 'league' && <LeagueSync user={auth.user} linkLeague={auth.linkLeague} />}
+            {activeTab === 'myteam' && <MyTeam user={auth.user} />}
             {activeTab === 'draftday' && <DraftDay players={players} />}
           </div>
         </main>

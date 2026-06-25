@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
-import type { Player } from '../../types';
+import type { Player, EspnTeam } from '../../types';
 import './DraftDay.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -69,13 +69,6 @@ function loadLeague(): LeagueInfo | null {
       creds: creds?.leagueId ? creds : null,
     };
   } catch { return null; }
-}
-
-interface EspnTeam {
-  teamId: number;
-  name: string;
-  abbrev: string;
-  owner: string;
 }
 
 interface SetupProps {

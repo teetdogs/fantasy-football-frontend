@@ -145,8 +145,45 @@ export interface LeagueTeam {
   draftPosition: number | null;
 }
 
+export interface EspnTeam {
+  teamId: number;
+  name: string;
+  abbrev: string;
+  owner: string;
+}
+
 export interface LeagueCredentials {
   leagueId: string;
   swid: string;
   espnS2: string;
+}
+
+export interface RosterPlayer {
+  playerId: number;
+  name: string;
+  position: string;
+  team: string;
+  consensusRank: number | null;
+  projectedPoints: number | null;
+  byeWeek: number | null;
+  injuryStatus: string | null;
+  onBench: boolean;
+}
+
+export interface WaiverSuggestion extends RosterPlayer {
+  percentOwned: number;
+  reason: string;
+  replaces: string | null;
+}
+
+export interface DropCandidate extends RosterPlayer {
+  surplus: boolean;
+}
+
+export interface MyTeamData {
+  teamId: number;
+  roster: RosterPlayer[];
+  waivers: WaiverSuggestion[];
+  drops: DropCandidate[];
+  counts: Record<string, number>;
 }
