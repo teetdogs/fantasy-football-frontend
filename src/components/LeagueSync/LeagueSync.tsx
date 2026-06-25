@@ -223,12 +223,13 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
                 <div className="ls-tip" style={{ marginBottom: '8px' }}>
                   <strong>Heads up:</strong> You'll need a desktop or laptop browser for this step — cookies aren't accessible on mobile.
                 </div>
-                <p>While on espn.com, open your browser's Developer Tools:</p>
+                <p>While logged in on espn.com, open your browser's Developer Tools:</p>
                 <ul>
-                  <li><strong>Chrome / Edge:</strong> Press <kbd>F12</kbd> or <kbd>Cmd+Opt+I</kbd> (Mac) / <kbd>Ctrl+Shift+I</kbd> (Windows) → <strong>Application</strong> tab</li>
+                  <li><strong>Chrome / Edge:</strong> Press <kbd>F12</kbd> or <kbd>Cmd+Opt+I</kbd> (Mac) / <kbd>Ctrl+Shift+I</kbd> (Windows)</li>
+                  <li>Click the <strong>Application</strong> tab at the top of DevTools (you may need to click the <kbd>{">>"}</kbd> arrows to find it — it's often hidden behind other tabs)</li>
                   <li><strong>Safari:</strong> Enable Develop menu in Preferences → Advanced, then <kbd>Cmd+Opt+I</kbd> → <strong>Storage</strong> tab</li>
                   <li><strong>Firefox:</strong> Press <kbd>F12</kbd> → <strong>Storage</strong> tab</li>
-                  <li>Expand <strong>Cookies</strong> → click <strong>https://www.espn.com</strong></li>
+                  <li>In the left sidebar, expand <strong>Cookies</strong> → click <strong>https://www.espn.com</strong></li>
                   <li>Find the cookie named <strong>SWID</strong> — copy its value (looks like <code>{"{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}"}</code>)</li>
                 </ul>
               </div>
