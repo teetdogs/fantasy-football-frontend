@@ -4,8 +4,6 @@ import type { MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTea
 import './MyTeam.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF'];
-
 interface SavedLeague {
   creds: { leagueId: string; swid: string; espnS2: string };
   settings?: { name?: string };
