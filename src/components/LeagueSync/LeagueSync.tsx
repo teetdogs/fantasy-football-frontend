@@ -16,7 +16,7 @@ function loadSaved(): { creds: LeagueCredentials; settings: LeagueSettings; team
 interface Props {
   onConnected?: (settings: LeagueSettings, teams: LeagueTeam[], creds: LeagueCredentials) => void;
   user?: { id: number; name: string; espn_league_id: string | null } | null;
-  linkLeague?: (leagueId: string, teamId?: number) => Promise<void>;
+  linkLeague?: (leagueId: string, teamId?: number, swid?: string, espnS2?: string) => Promise<void>;
 }
 
 type Step = 'form' | 'connected';
@@ -73,7 +73,7 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
       localStorage.setItem(LS_KEY, JSON.stringify({ creds, settings: settingsRes.data, teams: teamsRes.data.teams || [] }));
       onConnected?.(settingsRes.data, teamsRes.data.teams || [], creds);
       if (user && linkLeague) {
-        linkLeague(creds.leagueId);
+        linkLeague(creds.leagueId, undefined, creds.swid, creds.espnS2);
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {

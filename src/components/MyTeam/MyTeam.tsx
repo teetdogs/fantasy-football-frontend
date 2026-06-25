@@ -4,17 +4,15 @@ import type { MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTea
 import './MyTeam.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-interface SavedLeague {
-  creds: { leagueId: string; swid: string; espnS2: string };
-  settings?: { name?: string };
-}
 
-function loadLeague(): SavedLeague | null {
+interface Creds { leagueId: string; swid: string; espnS2: string }
+
+function loadLocalCreds(): Creds | null {
   try {
     const raw = localStorage.getItem('draftlab_league');
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return parsed?.creds?.leagueId ? parsed : null;
+    return parsed?.creds?.leagueId ? parsed.creds : null;
   } catch { return null; }
 }
 
@@ -40,8 +38,9 @@ interface Props {
   user?: { id: number } | null;
 }
 
-export function MyTeam({ user: _user }: Props) {
-  const [league] = useState(loadLeague);
+export function MyTeam({ user }: Props) {
+  const [creds, setCreds] = useState<Creds | null>(loadLocalCreds);
+  const [credsLoaded, setCredsLoaded] = useState(!user);
   const [teams, setTeams] = useState<EspnTeam[]>([]);
   const [teamId, setTeamId] = useState<number>(() => {
     const saved = localStorage.getItem(LS_TEAM_KEY);
@@ -51,11 +50,27 @@ export function MyTeam({ user: _user }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'roster' | 'waivers' | 'drops'>('roster');
+  const [expired, setExpired] = useState(false);
+
+  // For logged-in users, try to load server-side credentials first.
+  // Falls back to localStorage if server has none.
+  useEffect(() => {
+    if (!user) { setCredsLoaded(true); return; }
+    axios.get(`${API_URL}/api/auth/league-creds`, { withCredentials: true })
+      .then((res) => {
+        if (res.data.linked && res.data.swid && res.data.espnS2) {
+          const serverCreds: Creds = { leagueId: res.data.leagueId, swid: res.data.swid, espnS2: res.data.espnS2 };
+          setCreds(serverCreds);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setCredsLoaded(true));
+  }, [user]);
 
   // Load the league's teams so the user can pick which one is theirs.
   useEffect(() => {
-    if (!league) return;
-    axios.post(`${API_URL}/api/league/teams`, league.creds)
+    if (!creds || !credsLoaded) return;
+    axios.post(`${API_URL}/api/league/teams`, creds)
       .then((res) => {
         const t: EspnTeam[] = res.data.teams || [];
         setTeams(t);
@@ -63,31 +78,48 @@ export function MyTeam({ user: _user }: Props) {
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [league]);
+  }, [creds, credsLoaded]);
 
   const fetchTeam = useCallback(async (id: number) => {
-    if (!league || !id) return;
+    if (!creds || !id) return;
     setLoading(true);
     setError(null);
+    setExpired(false);
     try {
-      const res = await axios.post(`${API_URL}/api/league/my-team`, { ...league.creds, teamId: id });
+      const res = await axios.post(`${API_URL}/api/league/my-team`, { ...creds, teamId: id });
       setData(res.data);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data?.error) setError(err.response.data.error);
-      else setError('Could not load your team.');
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setExpired(true);
+        setError('Your ESPN cookies have expired.');
+      } else if (axios.isAxiosError(err) && err.response?.data?.error) {
+        const msg = err.response.data.error;
+        setExpired(msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('invalid'));
+        setError(msg);
+      } else {
+        setError('Could not load your team.');
+      }
     } finally {
       setLoading(false);
     }
-  }, [league]);
+  }, [creds]);
 
   useEffect(() => {
-    if (teamId) {
+    if (teamId && credsLoaded) {
       localStorage.setItem(LS_TEAM_KEY, String(teamId));
       fetchTeam(teamId);
     }
-  }, [teamId, fetchTeam]);
+  }, [teamId, credsLoaded, fetchTeam]);
 
-  if (!league) {
+  if (!credsLoaded) {
+    return (
+      <div className="card">
+        <div className="mt-empty"><p className="mt-note">Loading…</p></div>
+      </div>
+    );
+  }
+
+  if (!creds) {
     return (
       <div className="card">
         <div className="mt-empty">
@@ -131,7 +163,17 @@ export function MyTeam({ user: _user }: Props) {
 
       <div className="mt-body">
         {loading && <p className="mt-note">Loading your team…</p>}
-        {error && <div className="mt-error">{error}</div>}
+        {error && (
+          <div className="mt-error">
+            {error}
+            {expired && (
+              <p className="mt-expired-hint">
+                Go to <strong>My League</strong>, disconnect, and reconnect with fresh cookies from ESPN.
+                {user && ' Your new cookies will be saved to your account so other devices pick them up automatically.'}
+              </p>
+            )}
+          </div>
+        )}
 
         {!loading && !error && data && tab === 'roster' && (
           <>

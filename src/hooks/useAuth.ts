@@ -52,11 +52,11 @@ export function useAuth() {
     setUser(null);
   }, []);
 
-  const linkLeague = useCallback(async (espnLeagueId: string, espnTeamId?: number) => {
+  const linkLeague = useCallback(async (espnLeagueId: string, espnTeamId?: number, espnSwid?: string, espnS2?: string) => {
     try {
       const res = await axios.post(
         `${API_URL}/api/auth/link-league`,
-        { espnLeagueId, espnTeamId },
+        { espnLeagueId, espnTeamId, espnSwid, espnS2 },
         { withCredentials: true }
       );
       setUser(res.data.user);
