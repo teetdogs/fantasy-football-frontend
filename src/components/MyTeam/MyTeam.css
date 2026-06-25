@@ -130,6 +130,28 @@
   opacity: 0.65;
 }
 
+.mt-row.clickable {
+  cursor: pointer;
+}
+
+.mt-row.selected {
+  border: 1px solid var(--accent);
+  background: var(--surface-3);
+}
+
+/* Player card inline wrapper */
+.mt-card-wrap {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.mt-card-wrap .player-card {
+  position: relative;
+  left: auto;
+  top: auto;
+  max-width: 100%;
+}
+
 .mt-name {
   font-weight: 600;
   color: var(--text);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import type { MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam, TeamGrade } from '../../types';
+import type { Player, MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam, TeamGrade } from '../../types';
+import { PlayerCard } from '../PlayerCard/PlayerCard';
 import './MyTeam.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -18,9 +19,9 @@ function loadLocalCreds(): Creds | null {
 
 const LS_TEAM_KEY = 'draftlab_myteam_id';
 
-function PlayerRow({ p }: { p: RosterPlayer }) {
+function PlayerRow({ p, selected, onClick }: { p: RosterPlayer; selected?: boolean; onClick?: () => void }) {
   return (
-    <div className={`mt-row ${p.onBench ? 'bench' : ''}`}>
+    <div className={`mt-row ${p.onBench ? 'bench' : ''} ${selected ? 'selected' : ''} ${onClick ? 'clickable' : ''}`} onClick={onClick}>
       <span className="pos-badge" data-pos={p.position.toLowerCase()}>{p.position}</span>
       <span className="mt-name">{p.name}</span>
       <span className="mt-team">{p.team}</span>
@@ -81,9 +82,10 @@ function GradeCard({ grade }: { grade: TeamGrade }) {
 
 interface Props {
   user?: { id: number } | null;
+  players?: Player[];
 }
 
-export function MyTeam({ user }: Props) {
+export function MyTeam({ user, players = [] }: Props) {
   const [creds, setCreds] = useState<Creds | null>(loadLocalCreds);
   const [credsLoaded, setCredsLoaded] = useState(!user);
   const [teams, setTeams] = useState<EspnTeam[]>([]);
@@ -96,6 +98,9 @@ export function MyTeam({ user }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'grade' | 'roster' | 'waivers' | 'drops'>('grade');
   const [expired, setExpired] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
+
+  const selectedPlayer = selectedPlayerId ? players.find((p) => p.id === selectedPlayerId) || null : null;
 
   // For logged-in users, try to load server-side credentials first.
   // Falls back to localStorage if server has none.
@@ -229,14 +234,33 @@ export function MyTeam({ user }: Props) {
           <>
             <h4 className="mt-section">Starters</h4>
             <div className="mt-list">
-              {starters.map((p) => <PlayerRow key={p.playerId} p={p} />)}
+              {starters.map((p) => (
+                <PlayerRow
+                  key={p.playerId}
+                  p={p}
+                  selected={selectedPlayerId === p.playerId}
+                  onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
+                />
+              ))}
               {!starters.length && <p className="mt-note">No starters set.</p>}
             </div>
             <h4 className="mt-section">Bench</h4>
             <div className="mt-list">
-              {bench.map((p) => <PlayerRow key={p.playerId} p={p} />)}
+              {bench.map((p) => (
+                <PlayerRow
+                  key={p.playerId}
+                  p={p}
+                  selected={selectedPlayerId === p.playerId}
+                  onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
+                />
+              ))}
               {!bench.length && <p className="mt-note">Empty bench.</p>}
             </div>
+            {selectedPlayer && (
+              <div className="mt-card-wrap">
+                <PlayerCard player={selectedPlayer} />
+              </div>
+            )}
           </>
         )}
 

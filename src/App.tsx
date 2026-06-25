@@ -264,7 +264,7 @@ function App() {
             {activeTab === 'board' && <DraftBoard players={players} />}
             {activeTab === 'names' && <NameGenerator players={players} />}
             {activeTab === 'league' && <LeagueSync user={auth.user} linkLeague={auth.linkLeague} />}
-            {activeTab === 'myteam' && <MyTeam user={auth.user} />}
+            {activeTab === 'myteam' && <MyTeam user={auth.user} players={players} />}
           </div>
         </main>
       </div>
