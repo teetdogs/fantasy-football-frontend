@@ -51,23 +51,63 @@ function getRound(overall: number, numTeams: number): number {
 
 const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
 
-// ——— Read connected league from localStorage ———
-function loadLeague(): { size: number; rounds: number } | null {
+interface LeagueInfo {
+  size: number;
+  rounds: number;
+  creds: { leagueId: string; swid: string; espnS2: string } | null;
+}
+
+function loadLeague(): LeagueInfo | null {
   try {
     const raw = localStorage.getItem('draftlab_league');
     if (!raw) return null;
-    const { settings } = JSON.parse(raw);
+    const { settings, creds } = JSON.parse(raw);
     if (!settings?.size) return null;
-    return { size: settings.size, rounds: settings.draft?.rounds || 15 };
+    return {
+      size: settings.size,
+      rounds: settings.draft?.rounds || 15,
+      creds: creds?.leagueId ? creds : null,
+    };
   } catch { return null; }
 }
 
-// ——— Setup Screen ———
-function Setup({ onStart }: { onStart: (slot: number, teams: number, rounds: number) => void }) {
+interface EspnTeam {
+  teamId: number;
+  name: string;
+  abbrev: string;
+  owner: string;
+}
+
+interface SetupProps {
+  onStart: (slot: number, teams: number, rounds: number) => void;
+  onStartSync: (teamId: number, teams: EspnTeam[], numTeams: number, rounds: number) => void;
+}
+
+function Setup({ onStart, onStartSync }: SetupProps) {
   const league = loadLeague();
+  const canSync = !!league?.creds;
+  const [mode, setMode] = useState<'manual' | 'sync'>(canSync ? 'sync' : 'manual');
   const [slot, setSlot] = useState(1);
   const [teams, setTeams] = useState(league?.size || 12);
   const [rounds, setRounds] = useState(league?.rounds || 15);
+  const [espnTeams, setEspnTeams] = useState<EspnTeam[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<number>(0);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+
+  useEffect(() => {
+    if (mode === 'sync' && canSync && espnTeams.length === 0) {
+      setLoadingTeams(true);
+      axios.post(`${API_URL}/api/league/teams`, league!.creds)
+        .then((res) => {
+          const t = res.data.teams || [];
+          setEspnTeams(t);
+          if (t.length > 0) setSelectedTeam(t[0].teamId);
+        })
+        .catch(() => {})
+        .finally(() => setLoadingTeams(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   return (
     <div className="dd-setup">
@@ -83,42 +123,82 @@ function Setup({ onStart }: { onStart: (slot: number, teams: number, rounds: num
         AI-powered recommendations for every one of your picks.
       </p>
 
-      {league && (
-        <div className="dd-league-detected">
-          Pre-filled from your connected league ({league.size} teams, {league.rounds} rounds)
+      {canSync && (
+        <div className="dd-mode-toggle">
+          <button className={`dd-mode-opt ${mode === 'sync' ? 'active' : ''}`} onClick={() => setMode('sync')}>
+            ESPN Live Sync
+          </button>
+          <button className={`dd-mode-opt ${mode === 'manual' ? 'active' : ''}`} onClick={() => setMode('manual')}>
+            Manual Entry
+          </button>
         </div>
       )}
 
-      <div className="dd-setup-fields">
-        <label>
-          <span>Your draft position</span>
-          <select value={slot} onChange={(e) => setSlot(+e.target.value)}>
-            {Array.from({ length: teams }, (_, i) => (
-              <option key={i + 1} value={i + 1}>Pick #{i + 1}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span>League size</span>
-          <select value={teams} onChange={(e) => setTeams(+e.target.value)}>
-            {[8, 10, 12, 14].map((n) => (
-              <option key={n} value={n}>{n} teams</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span>Rounds</span>
-          <select value={rounds} onChange={(e) => setRounds(+e.target.value)}>
-            {[13, 14, 15, 16, 17, 18].map((n) => (
-              <option key={n} value={n}>{n} rounds</option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <button className="dd-start-btn" onClick={() => onStart(slot, teams, rounds)}>
-        Start Draft Companion
-      </button>
+      {mode === 'sync' ? (
+        <>
+          <div className="dd-league-detected">
+            Picks auto-sync from your ESPN league — no manual entry needed
+          </div>
+          <div className="dd-setup-fields">
+            <label>
+              <span>Your team</span>
+              {loadingTeams ? (
+                <select disabled><option>Loading teams…</option></select>
+              ) : (
+                <select value={selectedTeam} onChange={(e) => setSelectedTeam(+e.target.value)}>
+                  {espnTeams.map((t) => (
+                    <option key={t.teamId} value={t.teamId}>{t.name} ({t.owner})</option>
+                  ))}
+                </select>
+              )}
+            </label>
+          </div>
+          <button
+            className="dd-start-btn"
+            disabled={!selectedTeam || loadingTeams}
+            onClick={() => onStartSync(selectedTeam, espnTeams, teams, rounds)}
+          >
+            Start Live Sync
+          </button>
+        </>
+      ) : (
+        <>
+          {league && !canSync && (
+            <div className="dd-league-detected">
+              Pre-filled from your connected league ({league.size} teams, {league.rounds} rounds)
+            </div>
+          )}
+          <div className="dd-setup-fields">
+            <label>
+              <span>Your draft position</span>
+              <select value={slot} onChange={(e) => setSlot(+e.target.value)}>
+                {Array.from({ length: teams }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>Pick #{i + 1}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>League size</span>
+              <select value={teams} onChange={(e) => setTeams(+e.target.value)}>
+                {[8, 10, 12, 14].map((n) => (
+                  <option key={n} value={n}>{n} teams</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Rounds</span>
+              <select value={rounds} onChange={(e) => setRounds(+e.target.value)}>
+                {[13, 14, 15, 16, 17, 18].map((n) => (
+                  <option key={n} value={n}>{n} rounds</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <button className="dd-start-btn" onClick={() => onStart(slot, teams, rounds)}>
+            Start Draft Companion
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -238,6 +318,14 @@ export function DraftDay({ players }: DraftDayProps) {
   const [showLog, setShowLog] = useState(false);
   const [posFilter, setPosFilter] = useState('');
 
+  // Sync mode state
+  const [syncMode, setSyncMode] = useState(false);
+  const [syncTeamId, setSyncTeamId] = useState<number>(0);
+  const [syncTeams, setSyncTeams] = useState<EspnTeam[]>([]);
+  const [syncStatus, setSyncStatus] = useState<'polling' | 'error' | 'done'>('polling');
+  const [teamSlotMap, setTeamSlotMap] = useState<Map<number, number>>(new Map());
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const currentOverall = picks.length + 1;
   const currentRound = getRound(currentOverall, numTeams);
   const currentTeamSlot = getTeamSlot(currentOverall, numTeams);
@@ -303,20 +391,94 @@ export function DraftDay({ players }: DraftDayProps) {
     setPicks((prev) => prev.slice(0, -1));
   };
 
+  // ESPN live sync polling
+  useEffect(() => {
+    if (!started || !syncMode) return;
+
+    const league = loadLeague();
+    if (!league?.creds) return;
+
+    const poll = async () => {
+      try {
+        const res = await axios.post(`${API_URL}/api/league/draft-live`, league.creds);
+        const { picks: espnPicks, drafted } = res.data;
+
+        if (drafted) setSyncStatus('done');
+        else setSyncStatus('polling');
+
+        if (!espnPicks?.length) return;
+
+        // Build teamId → slot mapping from round 1 picks
+        const slotMap = new Map<number, number>();
+        for (const p of espnPicks) {
+          if (p.round === 1) {
+            slotMap.set(p.teamId, p.pick);
+          }
+        }
+        setTeamSlotMap(slotMap);
+
+        // Derive user's slot from their teamId
+        const userSlot = slotMap.get(syncTeamId);
+        if (userSlot && userSlot !== yourSlot) {
+          setYourSlot(userSlot);
+        }
+
+        // Convert ESPN picks to our format
+        const converted: DraftPick[] = espnPicks.map((p: { overall: number; round: number; teamId: number; playerId: number; playerName: string; position: string; team: string }) => ({
+          overall: p.overall,
+          round: p.round,
+          teamSlot: slotMap.get(p.teamId) || p.teamId,
+          playerId: p.playerId,
+          playerName: p.playerName,
+          position: p.position,
+          team: p.team,
+        }));
+
+        setPicks(converted);
+      } catch {
+        setSyncStatus('error');
+      }
+    };
+
+    poll();
+    pollRef.current = setInterval(poll, 5000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [started, syncMode, syncTeamId, yourSlot]);
+
   const handleStart = (slot: number, teams: number, rounds: number) => {
     setYourSlot(slot);
     setNumTeams(teams);
     setNumRounds(rounds);
+    setSyncMode(false);
     setPicks([]);
     setRecommendations([]);
     setNeeds([]);
     setStarted(true);
   };
 
+  const handleStartSync = (teamId: number, teams: EspnTeam[], leagueSize: number, rounds: number) => {
+    setSyncTeamId(teamId);
+    setSyncTeams(teams);
+    setNumTeams(leagueSize);
+    setNumRounds(rounds);
+    setSyncMode(true);
+    setPicks([]);
+    setRecommendations([]);
+    setNeeds([]);
+    setSyncStatus('polling');
+    setStarted(true);
+  };
+
+  const handleRestart = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    setSyncMode(false);
+    setStarted(false);
+  };
+
   if (!started) {
     return (
       <div className="card">
-        <Setup onStart={handleStart} />
+        <Setup onStart={handleStart} onStartSync={handleStartSync} />
       </div>
     );
   }
@@ -359,18 +521,27 @@ export function DraftDay({ players }: DraftDayProps) {
           <span className="dd-pick-num">Pick #{currentOverall}</span>
           {isYourTurn ? (
             <span className="dd-turn-badge">YOUR PICK</span>
+          ) : syncMode ? (
+            <span className="dd-turn-other">Auto-syncing from ESPN</span>
           ) : (
             <span className="dd-turn-other">Team {currentTeamSlot}'s pick</span>
           )}
         </div>
         <div className="dd-header-right">
-          <button className="dd-undo" onClick={undoLastPick} disabled={picks.length === 0} title="Undo last pick">
-            Undo
-          </button>
+          {syncMode && (
+            <span className={`dd-sync-badge ${syncStatus}`}>
+              {syncStatus === 'polling' ? 'Syncing' : syncStatus === 'error' ? 'Sync error' : 'Complete'}
+            </span>
+          )}
+          {!syncMode && (
+            <button className="dd-undo" onClick={undoLastPick} disabled={picks.length === 0} title="Undo last pick">
+              Undo
+            </button>
+          )}
           <button className="dd-log-toggle" onClick={() => setShowLog((v) => !v)}>
             {showLog ? 'Hide Log' : `Log (${picks.length})`}
           </button>
-          <button className="dd-restart" onClick={() => setStarted(false)}>
+          <button className="dd-restart" onClick={handleRestart}>
             Restart
           </button>
         </div>
@@ -410,15 +581,17 @@ export function DraftDay({ players }: DraftDayProps) {
 
         {/* Center: Pick area + Recommendations */}
         <div className="dd-main">
-          <div className="dd-pick-area">
-            <PickSearch
-              players={players}
-              takenIds={takenIds}
-              onPick={makePick}
-              isYourTurn={isYourTurn}
-              placeholder={isYourTurn ? 'Search to make your pick…' : `Search — who did Team ${currentTeamSlot} draft?`}
-            />
-          </div>
+          {!syncMode && (
+            <div className="dd-pick-area">
+              <PickSearch
+                players={players}
+                takenIds={takenIds}
+                onPick={makePick}
+                isYourTurn={isYourTurn}
+                placeholder={isYourTurn ? 'Search to make your pick…' : `Search — who did Team ${currentTeamSlot} draft?`}
+              />
+            </div>
+          )}
 
           {isYourTurn && recommendations.length > 0 && (
             <div className="dd-recs">
@@ -450,11 +623,15 @@ export function DraftDay({ players }: DraftDayProps) {
           {!isYourTurn && (
             <div className="dd-waiting">
               <div className="dd-waiting-msg">
-                Waiting for Team {currentTeamSlot} to pick…
+                {syncMode
+                  ? `Waiting for picks… (auto-syncing every 5s)`
+                  : `Waiting for Team ${currentTeamSlot} to pick…`}
               </div>
-              <p className="dd-waiting-hint">
-                Search above and select the player they drafted to advance.
-              </p>
+              {!syncMode && (
+                <p className="dd-waiting-hint">
+                  Search above and select the player they drafted to advance.
+                </p>
+              )}
               {recommendations.length > 0 && (
                 <div className="dd-preview">
                   <h4 className="dd-section-title">Preview: Your Next Pick</h4>

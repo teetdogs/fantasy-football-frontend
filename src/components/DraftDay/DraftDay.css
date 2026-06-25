@@ -36,6 +36,65 @@
   display: inline-block;
 }
 
+/* ====== Mode toggle ====== */
+.dd-mode-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  display: inline-flex;
+}
+
+.dd-mode-opt {
+  padding: 8px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  background: var(--surface-2);
+  border: none;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+
+.dd-mode-opt:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.dd-mode-opt:hover {
+  color: var(--text);
+}
+
+.dd-mode-opt.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ====== Sync badge ====== */
+.dd-sync-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.dd-sync-badge.polling {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--accent);
+  animation: dd-pulse 2s ease-in-out infinite;
+}
+
+.dd-sync-badge.error {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--danger);
+}
+
+.dd-sync-badge.done {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--accent);
+}
+
 .dd-setup-fields {
   display: flex;
   gap: 16px;
