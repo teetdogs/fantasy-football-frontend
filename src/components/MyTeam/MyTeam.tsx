@@ -235,32 +235,39 @@ export function MyTeam({ user, players = [] }: Props) {
             <h4 className="mt-section">Starters</h4>
             <div className="mt-list">
               {starters.map((p) => (
-                <PlayerRow
-                  key={p.playerId}
-                  p={p}
-                  selected={selectedPlayerId === p.playerId}
-                  onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
-                />
+                <div key={p.playerId}>
+                  <PlayerRow
+                    p={p}
+                    selected={selectedPlayerId === p.playerId}
+                    onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
+                  />
+                  {selectedPlayerId === p.playerId && selectedPlayer && (
+                    <div className="mt-card-wrap">
+                      <PlayerCard player={selectedPlayer} />
+                    </div>
+                  )}
+                </div>
               ))}
               {!starters.length && <p className="mt-note">No starters set.</p>}
             </div>
             <h4 className="mt-section">Bench</h4>
             <div className="mt-list">
               {bench.map((p) => (
-                <PlayerRow
-                  key={p.playerId}
-                  p={p}
-                  selected={selectedPlayerId === p.playerId}
-                  onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
-                />
+                <div key={p.playerId}>
+                  <PlayerRow
+                    p={p}
+                    selected={selectedPlayerId === p.playerId}
+                    onClick={() => setSelectedPlayerId(selectedPlayerId === p.playerId ? null : p.playerId)}
+                  />
+                  {selectedPlayerId === p.playerId && selectedPlayer && (
+                    <div className="mt-card-wrap">
+                      <PlayerCard player={selectedPlayer} />
+                    </div>
+                  )}
+                </div>
               ))}
               {!bench.length && <p className="mt-note">Empty bench.</p>}
             </div>
-            {selectedPlayer && (
-              <div className="mt-card-wrap">
-                <PlayerCard player={selectedPlayer} />
-              </div>
-            )}
           </>
         )}
 
