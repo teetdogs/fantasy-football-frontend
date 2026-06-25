@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CSSProperties } from 'react';
-import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam } from './components';
+import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam, TradeAnalyzer } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import { useAuth } from './hooks/useAuth';
@@ -24,6 +24,7 @@ const TABS = [
   { id: 'projections', label: 'Projections' },
   { id: 'board', label: 'Draft Board' },
   { id: 'names', label: 'Team Names' },
+  { id: 'trade', label: 'Trade' },
   { id: 'league', label: 'My League' },
   { id: 'myteam', label: 'My Team' },
 ] as const;
@@ -263,6 +264,7 @@ function App() {
             )}
             {activeTab === 'board' && <DraftBoard players={players} />}
             {activeTab === 'names' && <NameGenerator players={players} />}
+            {activeTab === 'trade' && <TradeAnalyzer players={players} />}
             {activeTab === 'league' && <LeagueSync user={auth.user} linkLeague={auth.linkLeague} />}
             {activeTab === 'myteam' && <MyTeam user={auth.user} players={players} />}
           </div>
