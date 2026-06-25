@@ -4,3 +4,6 @@ export { NameGenerator } from './NameGenerator/NameGenerator';
 export { LeagueSync } from './LeagueSync/LeagueSync';
 export { MyTeam } from './MyTeam/MyTeam';
 export { TradeAnalyzer } from './TradeAnalyzer/TradeAnalyzer';
+export { PowerRankings } from './PowerRankings/PowerRankings';
+export { PlayerCompare } from './PlayerCompare/PlayerCompare';
+export { ByeWeek } from './ByeWeek/ByeWeek';

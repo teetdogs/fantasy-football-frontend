@@ -1,0 +1,112 @@
+.pc-body { padding: 18px; }
+
+.pc-selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pc-slot { flex: 1; }
+
+.pc-vs {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.pc-search { position: relative; }
+.pc-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  outline: none;
+}
+.pc-search-input::placeholder { color: var(--text-dim); }
+.pc-search-input:focus { border-color: var(--accent); }
+
+.pc-search-drop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-md);
+  margin-top: 4px;
+}
+
+.pc-search-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+.pc-search-opt:last-child { border-bottom: none; }
+.pc-search-opt:hover { background: var(--surface-2); }
+
+.pc-opt-name { font-size: 12.5px; font-weight: 600; color: var(--text); flex: 1; }
+.pc-opt-team { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+
+.pc-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+}
+
+.pc-selected-name { font-size: 13px; font-weight: 700; color: var(--text); }
+
+.pc-clear {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pc-clear:hover { color: var(--danger); }
+
+.pc-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .pc-cards { grid-template-columns: 1fr; }
+}
+
+.pc-card-wrap .player-card {
+  position: relative;
+  left: auto;
+  top: auto;
+  max-width: 100%;
+}
+
+.pc-hint {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 30px 0;
+}
