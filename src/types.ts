@@ -209,11 +209,34 @@ export interface TeamGrade {
   summary: string;
 }
 
+export interface LineupPlayer extends RosterPlayer {
+  slot: string;
+  onBye: boolean;
+  hurt: boolean;
+  playable: boolean;
+  pts: number;
+}
+
+export interface LineupSwap {
+  benchIn: { name: string; position: string; pts: number };
+  starterOut: { name: string; position: string; pts: number };
+  ptsDiff: number;
+}
+
+export interface Lineup {
+  starters: LineupPlayer[];
+  bench: LineupPlayer[];
+  swaps: LineupSwap[];
+  totalPts: number;
+  week: number | null;
+}
+
 export interface MyTeamData {
   teamId: number;
   roster: RosterPlayer[];
   waivers: WaiverSuggestion[];
   drops: DropCandidate[];
   grade: TeamGrade;
+  lineup: Lineup;
   counts: Record<string, number>;
 }

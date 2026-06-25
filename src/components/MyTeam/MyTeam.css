@@ -251,6 +251,92 @@
   margin-bottom: 8px;
 }
 
+/* ====== Start/Sit Lineup ====== */
+.mt-lineup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.mt-lineup-total {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.mt-lineup-slot {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.mt-row.unavailable {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.mt-bye-flag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--danger);
+  background: rgba(248, 113, 113, 0.1);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.mt-swap-title {
+  margin-top: 20px;
+}
+
+.mt-swap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(52, 211, 153, 0.04);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-md);
+  margin-bottom: 4px;
+}
+
+.mt-swap-in, .mt-swap-out {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mt-swap-arrow {
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.mt-swap-arrow.down {
+  color: var(--danger);
+}
+
+.mt-swap-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-swap-diff {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 /* ====== Team Grade ====== */
 .mt-grade {
   max-width: 640px;

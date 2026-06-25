@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import type { Player, MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam, TeamGrade } from '../../types';
+import type { Player, MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam, TeamGrade, Lineup } from '../../types';
 import { PlayerCard } from '../PlayerCard/PlayerCard';
 import './MyTeam.css';
 
@@ -31,6 +31,67 @@ function PlayerRow({ p, selected, onClick }: { p: RosterPlayer; selected?: boole
       )}
       <span className="mt-rank tnum">{p.consensusRank ? `#${p.consensusRank}` : '—'}</span>
       <span className="mt-pts tnum">{p.projectedPoints != null ? `${p.projectedPoints.toFixed(0)} pts` : '—'}</span>
+    </div>
+  );
+}
+
+function LineupView({ lineup }: { lineup: Lineup }) {
+  return (
+    <div className="mt-lineup">
+      <div className="mt-lineup-header">
+        <h4 className="mt-section">Recommended Starters</h4>
+        <span className="mt-lineup-total tnum">{lineup.totalPts} projected pts</span>
+      </div>
+      <div className="mt-list">
+        {lineup.starters.map((p) => (
+          <div className={`mt-row ${!p.playable ? 'unavailable' : ''}`} key={p.playerId}>
+            <span className="mt-lineup-slot">{p.slot}</span>
+            <span className="pos-badge" data-pos={p.position.toLowerCase()}>{p.position}</span>
+            <span className="mt-name">{p.name}</span>
+            <span className="mt-team">{p.team}</span>
+            {p.onBye && <span className="mt-bye-flag">BYE</span>}
+            {p.hurt && <span className="mt-injury">OUT</span>}
+            <span className="mt-pts tnum">{p.pts > 0 ? `${p.pts.toFixed(0)} pts` : '—'}</span>
+          </div>
+        ))}
+      </div>
+
+      {lineup.swaps.length > 0 && (
+        <>
+          <h4 className="mt-section mt-swap-title">Suggested Swaps</h4>
+          <div className="mt-list">
+            {lineup.swaps.map((s, i) => (
+              <div className="mt-swap" key={i}>
+                <div className="mt-swap-in">
+                  <span className="mt-swap-arrow">&#9650;</span>
+                  <span className="mt-swap-name">{s.benchIn.name}</span>
+                  <span className="mt-pts tnum">{s.benchIn.pts.toFixed(0)} pts</span>
+                </div>
+                <div className="mt-swap-out">
+                  <span className="mt-swap-arrow down">&#9660;</span>
+                  <span className="mt-swap-name">{s.starterOut.name}</span>
+                  <span className="mt-pts tnum">{s.starterOut.pts.toFixed(0)} pts</span>
+                </div>
+                <span className="mt-swap-diff tnum">+{s.ptsDiff} pts</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <h4 className="mt-section">Bench</h4>
+      <div className="mt-list">
+        {lineup.bench.map((p) => (
+          <div className={`mt-row bench ${!p.playable ? 'unavailable' : ''}`} key={p.playerId}>
+            <span className="pos-badge" data-pos={p.position.toLowerCase()}>{p.position}</span>
+            <span className="mt-name">{p.name}</span>
+            <span className="mt-team">{p.team}</span>
+            {p.onBye && <span className="mt-bye-flag">BYE</span>}
+            {p.hurt && <span className="mt-injury">OUT</span>}
+            <span className="mt-pts tnum">{p.pts > 0 ? `${p.pts.toFixed(0)} pts` : '—'}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -96,7 +157,7 @@ export function MyTeam({ user, players = [] }: Props) {
   const [data, setData] = useState<MyTeamData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'grade' | 'roster' | 'waivers' | 'drops'>('grade');
+  const [tab, setTab] = useState<'grade' | 'lineup' | 'roster' | 'waivers' | 'drops'>('grade');
   const [expired, setExpired] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
 
@@ -203,6 +264,9 @@ export function MyTeam({ user, players = [] }: Props) {
         <button className={`mt-tab ${tab === 'grade' ? 'active' : ''}`} onClick={() => setTab('grade')}>
           Team Grade {data?.grade ? data.grade.overall.letter : ''}
         </button>
+        <button className={`mt-tab ${tab === 'lineup' ? 'active' : ''}`} onClick={() => setTab('lineup')}>
+          Start/Sit
+        </button>
         <button className={`mt-tab ${tab === 'roster' ? 'active' : ''}`} onClick={() => setTab('roster')}>
           Roster
         </button>
@@ -229,6 +293,8 @@ export function MyTeam({ user, players = [] }: Props) {
         )}
 
         {!loading && !error && data && tab === 'grade' && <GradeCard grade={data.grade} />}
+
+        {!loading && !error && data && tab === 'lineup' && <LineupView lineup={data.lineup} />}
 
         {!loading && !error && data && tab === 'roster' && (
           <>
