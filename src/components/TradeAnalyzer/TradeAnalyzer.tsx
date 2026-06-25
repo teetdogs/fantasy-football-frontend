@@ -1,9 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import type { Player } from '../../types';
 import './TradeAnalyzer.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+interface TradeSuggestion {
+  partner: { teamId: number; name: string };
+  give: { name: string; position: string; team: string; consensusRank: number; value: number };
+  get: { name: string; position: string; team: string; consensusRank: number; value: number };
+  fairness: string;
+  valueDiff: number;
+  reason: string;
+}
+
+function loadCreds() {
+  try {
+    const raw = localStorage.getItem('draftlab_league');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.creds?.leagueId ? parsed.creds : null;
+  } catch { return null; }
+}
 
 interface ValuedPlayer {
   player: { id: number; name: string; position: string; team: string; consensusRank: number; projectedPoints: number };
@@ -70,6 +88,20 @@ export function TradeAnalyzer({ players }: Props) {
   const [getting, setGetting] = useState<Player[]>([]);
   const [result, setResult] = useState<TradeResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<TradeSuggestion[]>([]);
+  const [sugLoading, setSugLoading] = useState(false);
+  const [creds] = useState(loadCreds);
+
+  useEffect(() => {
+    if (!creds) return;
+    const savedTeamId = localStorage.getItem('draftlab_myteam_id');
+    if (!savedTeamId) return;
+    setSugLoading(true);
+    axios.post(`${API_URL}/api/league/trade-suggestions`, { ...creds, teamId: Number(savedTeamId) })
+      .then((res) => setSuggestions(res.data.suggestions || []))
+      .catch(() => {})
+      .finally(() => setSugLoading(false));
+  }, [creds]);
 
   const usedIds = useMemo(() => {
     const ids = new Set<number>();
@@ -193,6 +225,45 @@ export function TradeAnalyzer({ players }: Props) {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {creds && (
+          <div className="ta-suggestions">
+            <h3 className="ta-sug-title">Recommended Trades</h3>
+            <p className="ta-sug-desc">Based on your roster's surplus and needs vs. other teams in your league.</p>
+
+            {sugLoading && <p className="ta-note">Scanning league rosters…</p>}
+
+            {!sugLoading && suggestions.length === 0 && (
+              <p className="ta-note">No clear trade opportunities found — your roster is well-balanced.</p>
+            )}
+
+            {!sugLoading && suggestions.map((s, i) => (
+              <div className="ta-sug" key={i}>
+                <div className="ta-sug-header">
+                  <span className="ta-sug-partner">Trade with {s.partner.name}</span>
+                  <span className={`ta-sug-fairness ${s.valueDiff >= 0 ? 'good' : 'bad'}`}>{s.fairness}</span>
+                </div>
+                <div className="ta-sug-players">
+                  <div className="ta-sug-give">
+                    <span className="ta-sug-dir">You give</span>
+                    <span className="pos-badge" data-pos={s.give.position.toLowerCase()}>{s.give.position}</span>
+                    <span className="ta-sug-name">{s.give.name}</span>
+                    <span className="ta-sug-rank tnum">#{s.give.consensusRank}</span>
+                    <span className="ta-sug-val tnum">{s.give.value}</span>
+                  </div>
+                  <div className="ta-sug-get">
+                    <span className="ta-sug-dir">You get</span>
+                    <span className="pos-badge" data-pos={s.get.position.toLowerCase()}>{s.get.position}</span>
+                    <span className="ta-sug-name">{s.get.name}</span>
+                    <span className="ta-sug-rank tnum">#{s.get.consensusRank}</span>
+                    <span className="ta-sug-val tnum">{s.get.value}</span>
+                  </div>
+                </div>
+                <span className="ta-sug-reason">{s.reason}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>

@@ -261,3 +261,122 @@
   width: 28px;
   text-align: right;
 }
+
+/* ====== Suggested Trades ====== */
+.ta-suggestions {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  margin-top: 10px;
+}
+
+.ta-sug-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.ta-sug-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+.ta-note {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.ta-sug {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.ta-sug:hover { border-color: var(--accent); }
+
+.ta-sug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ta-sug-partner {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ta-sug-fairness {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+.ta-sug-fairness.good { background: rgba(52, 211, 153, 0.1); color: var(--accent); }
+.ta-sug-fairness.bad { background: rgba(248, 113, 113, 0.1); color: var(--danger); }
+
+.ta-sug-players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.ta-sug-give, .ta-sug-get {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--r-xs);
+  font-size: 12px;
+}
+
+.ta-sug-give { background: rgba(248, 113, 113, 0.04); }
+.ta-sug-get { background: rgba(52, 211, 153, 0.04); }
+
+.ta-sug-dir {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  width: 52px;
+  flex-shrink: 0;
+}
+.ta-sug-give .ta-sug-dir { color: var(--danger); }
+.ta-sug-get .ta-sug-dir { color: var(--accent); }
+
+.ta-sug-name {
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ta-sug-rank {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.ta-sug-val {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  width: 24px;
+  text-align: right;
+}
+
+.ta-sug-reason {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+}
