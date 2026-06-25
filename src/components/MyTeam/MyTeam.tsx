@@ -41,7 +41,7 @@ interface Props {
 }
 
 export function MyTeam({ user: _user }: Props) {
-  const league = loadLeague();
+  const [league] = useState(loadLeague);
   const [teams, setTeams] = useState<EspnTeam[]>([]);
   const [teamId, setTeamId] = useState<number>(() => {
     const saved = localStorage.getItem(LS_TEAM_KEY);
@@ -63,7 +63,7 @@ export function MyTeam({ user: _user }: Props) {
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [league]);
 
   const fetchTeam = useCallback(async (id: number) => {
     if (!league || !id) return;
