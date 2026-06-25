@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CSSProperties } from 'react';
-import { PlayerRanking, TierVisualizer, DraftBoard, NameGenerator, LeagueSync, MyTeam } from './components';
+import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import { useAuth } from './hooks/useAuth';
@@ -22,7 +22,6 @@ const WEIGHT_META: { key: keyof RankingWeights; label: string; hint: string; col
 const TABS = [
   { id: 'table', label: 'Who to Draft' },
   { id: 'projections', label: 'Projections' },
-  { id: 'tiers', label: 'Tiers' },
   { id: 'board', label: 'Draft Board' },
   { id: 'names', label: 'Team Names' },
   { id: 'league', label: 'My League' },
@@ -262,7 +261,6 @@ function App() {
             {activeTab === 'projections' && (
               <Projections players={players} positionFilter={positionFilter} search={search} loading={loading} />
             )}
-            {activeTab === 'tiers' && <TierVisualizer players={players} loading={loading} />}
             {activeTab === 'board' && <DraftBoard players={players} />}
             {activeTab === 'names' && <NameGenerator players={players} />}
             {activeTab === 'league' && <LeagueSync user={auth.user} linkLeague={auth.linkLeague} />}
