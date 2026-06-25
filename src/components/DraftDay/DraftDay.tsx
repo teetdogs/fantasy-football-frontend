@@ -328,7 +328,8 @@ export function DraftDay({ players }: DraftDayProps) {
   const currentRound = getRound(currentOverall, numTeams);
   const currentTeamSlot = getTeamSlot(currentOverall, numTeams);
   const isYourTurn = currentTeamSlot === yourSlot;
-  const isDraftOver = currentRound > numRounds;
+  const isDraftOver = picks.length > 0 && currentRound > numRounds;
+  const waitingForDraft = syncMode && picks.length === 0;
 
   const takenIds = useMemo(() => new Set(picks.map((p) => p.playerId)), [picks]);
 
@@ -475,6 +476,29 @@ export function DraftDay({ players }: DraftDayProps) {
     return (
       <div className="card">
         <Setup onStart={handleStart} onStartSync={handleStartSync} />
+      </div>
+    );
+  }
+
+  if (waitingForDraft) {
+    return (
+      <div className="card">
+        <div className="dd-waiting-room">
+          <div className="dd-setup-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <h3>Waiting for Draft to Start</h3>
+          <p>Connected to ESPN and polling every 5 seconds. Picks will appear automatically once the draft begins.</p>
+          <span className={`dd-sync-badge ${syncStatus}`}>
+            {syncStatus === 'polling' ? 'Listening…' : syncStatus === 'error' ? 'Connection error — retrying' : 'Connected'}
+          </span>
+          <button className="dd-restart" onClick={handleRestart} style={{ marginTop: 20 }}>
+            Back to Setup
+          </button>
+        </div>
       </div>
     );
   }
