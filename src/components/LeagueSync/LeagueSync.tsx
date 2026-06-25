@@ -15,11 +15,13 @@ function loadSaved(): { creds: LeagueCredentials; settings: LeagueSettings; team
 
 interface Props {
   onConnected?: (settings: LeagueSettings, teams: LeagueTeam[], creds: LeagueCredentials) => void;
+  user?: { id: number; name: string; espn_league_id: string | null } | null;
+  linkLeague?: (leagueId: string, teamId?: number) => Promise<void>;
 }
 
 type Step = 'form' | 'connected';
 
-export function LeagueSync({ onConnected }: Props) {
+export function LeagueSync({ onConnected, user, linkLeague }: Props) {
   const saved = loadSaved();
   const [leagueId, setLeagueId] = useState(saved?.creds.leagueId || '');
   const [swid, setSwid] = useState(saved?.creds.swid || '');
@@ -70,6 +72,9 @@ export function LeagueSync({ onConnected }: Props) {
       setStep('connected');
       localStorage.setItem(LS_KEY, JSON.stringify({ creds, settings: settingsRes.data, teams: teamsRes.data.teams || [] }));
       onConnected?.(settingsRes.data, teamsRes.data.teams || [], creds);
+      if (user && linkLeague) {
+        linkLeague(creds.leagueId);
+      }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
         setError(err.response.data.error);
@@ -100,7 +105,10 @@ export function LeagueSync({ onConnected }: Props) {
             <h2>Your League</h2>
             <p className="card-sub">Connected to ESPN Fantasy Football</p>
           </div>
-          <button className="ls-disconnect" onClick={disconnect}>Disconnect</button>
+          <div className="ls-head-actions">
+            {user && <span className="ls-saved-badge">Saved to account</span>}
+            <button className="ls-disconnect" onClick={disconnect}>Disconnect</button>
+          </div>
         </div>
 
         <div className="ls-connected">
