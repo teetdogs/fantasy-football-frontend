@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import type { MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam } from '../../types';
+import type { MyTeamData, RosterPlayer, WaiverSuggestion, DropCandidate, EspnTeam, TeamGrade } from '../../types';
 import './MyTeam.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -34,6 +34,43 @@ function PlayerRow({ p }: { p: RosterPlayer }) {
   );
 }
 
+const DEPTH_LABEL: Record<string, string> = { deep: 'Deep', ok: 'OK', thin: 'Thin', empty: '—' };
+
+function GradeCard({ grade }: { grade: TeamGrade }) {
+  return (
+    <div className="mt-grade">
+      <div className="mt-grade-hero" style={{ borderColor: grade.overall.color }}>
+        <span className="mt-grade-letter" style={{ color: grade.overall.color }}>{grade.overall.letter}</span>
+        <div className="mt-grade-meta">
+          <span className="mt-grade-score tnum">{grade.overall.score}/100</span>
+          <span className="mt-grade-label">Team Grade</span>
+        </div>
+      </div>
+      <p className="mt-grade-summary">{grade.summary}</p>
+
+      <div className="mt-grade-positions">
+        {['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map((pos) => {
+          const g = grade.positions[pos];
+          if (!g) return null;
+          return (
+            <div className="mt-grade-pos" key={pos}>
+              <div className="mt-grade-pos-head">
+                <span className="pos-badge" data-pos={pos.toLowerCase()}>{pos}</span>
+                <span className="mt-grade-pos-letter" style={{ color: g.color }}>{g.letter}</span>
+                <span className="mt-grade-pos-score tnum">{g.score}</span>
+              </div>
+              {g.topPlayer && (
+                <span className="mt-grade-pos-top">{g.topPlayer.name} (#{g.topPlayer.rank})</span>
+              )}
+              <span className={`mt-grade-depth ${g.depth}`}>Depth: {DEPTH_LABEL[g.depth]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   user?: { id: number } | null;
 }
@@ -49,7 +86,7 @@ export function MyTeam({ user }: Props) {
   const [data, setData] = useState<MyTeamData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'roster' | 'waivers' | 'drops'>('roster');
+  const [tab, setTab] = useState<'grade' | 'roster' | 'waivers' | 'drops'>('grade');
   const [expired, setExpired] = useState(false);
 
   // For logged-in users, try to load server-side credentials first.
@@ -150,6 +187,9 @@ export function MyTeam({ user }: Props) {
       </div>
 
       <div className="mt-tabs">
+        <button className={`mt-tab ${tab === 'grade' ? 'active' : ''}`} onClick={() => setTab('grade')}>
+          Team Grade {data?.grade ? data.grade.overall.letter : ''}
+        </button>
         <button className={`mt-tab ${tab === 'roster' ? 'active' : ''}`} onClick={() => setTab('roster')}>
           Roster
         </button>
@@ -174,6 +214,8 @@ export function MyTeam({ user }: Props) {
             )}
           </div>
         )}
+
+        {!loading && !error && data && tab === 'grade' && <GradeCard grade={data.grade} />}
 
         {!loading && !error && data && tab === 'roster' && (
           <>

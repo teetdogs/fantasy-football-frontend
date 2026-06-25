@@ -180,10 +180,26 @@ export interface DropCandidate extends RosterPlayer {
   surplus: boolean;
 }
 
+export interface PositionGrade {
+  score: number;
+  letter: string;
+  color: string;
+  count: number;
+  topPlayer: { name: string; rank: number } | null;
+  depth: 'empty' | 'thin' | 'ok' | 'deep';
+}
+
+export interface TeamGrade {
+  overall: { score: number; letter: string; color: string };
+  positions: Record<string, PositionGrade>;
+  summary: string;
+}
+
 export interface MyTeamData {
   teamId: number;
   roster: RosterPlayer[];
   waivers: WaiverSuggestion[];
   drops: DropCandidate[];
+  grade: TeamGrade;
   counts: Record<string, number>;
 }
