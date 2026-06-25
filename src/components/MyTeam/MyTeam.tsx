@@ -35,6 +35,7 @@ function PlayerRow({ p }: { p: RosterPlayer }) {
 }
 
 const DEPTH_LABEL: Record<string, string> = { deep: 'Deep', ok: 'OK', thin: 'Thin', empty: '—' };
+const ROLE_LABEL: Record<string, string> = { starter: 'Starter', flex: 'FLEX', bench: 'Bench' };
 
 function GradeCard({ grade }: { grade: TeamGrade }) {
   return (
@@ -49,20 +50,27 @@ function GradeCard({ grade }: { grade: TeamGrade }) {
       <p className="mt-grade-summary">{grade.summary}</p>
 
       <div className="mt-grade-positions">
-        {['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].map((pos) => {
+        {['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DEF'].map((pos) => {
           const g = grade.positions[pos];
-          if (!g) return null;
+          if (!g || g.count === 0) return null;
           return (
             <div className="mt-grade-pos" key={pos}>
               <div className="mt-grade-pos-head">
                 <span className="pos-badge" data-pos={pos.toLowerCase()}>{pos}</span>
                 <span className="mt-grade-pos-letter" style={{ color: g.color }}>{g.letter}</span>
                 <span className="mt-grade-pos-score tnum">{g.score}</span>
+                <span className={`mt-grade-depth ${g.depth}`}>{DEPTH_LABEL[g.depth]}</span>
               </div>
-              {g.topPlayer && (
-                <span className="mt-grade-pos-top">{g.topPlayer.name} (#{g.topPlayer.rank})</span>
-              )}
-              <span className={`mt-grade-depth ${g.depth}`}>Depth: {DEPTH_LABEL[g.depth]}</span>
+              <div className="mt-grade-players">
+                {g.players.map((p) => (
+                  <div className={`mt-grade-player ${p.role}`} key={p.name}>
+                    <span className="mt-grade-player-name">{p.name}</span>
+                    <span className="mt-grade-player-role">{ROLE_LABEL[p.role]}</span>
+                    <span className="mt-grade-player-rank tnum">{p.rank ? `#${p.rank}` : '—'}</span>
+                    <span className="mt-grade-player-score tnum">{p.score}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           );
         })}

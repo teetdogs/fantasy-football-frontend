@@ -277,16 +277,16 @@
 }
 
 .mt-grade-positions {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
 .mt-grade-pos {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px;
+  gap: 6px;
+  padding: 14px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
@@ -296,6 +296,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 2px;
 }
 
 .mt-grade-pos-letter {
@@ -307,16 +308,6 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--text-dim);
-  margin-left: auto;
-}
-
-.mt-grade-pos-top {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .mt-grade-depth {
@@ -325,6 +316,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-dim);
+  margin-left: auto;
 }
 
 .mt-grade-depth.deep {
@@ -333,4 +325,63 @@
 
 .mt-grade-depth.thin {
   color: var(--danger);
+}
+
+/* Player rows inside position cards */
+.mt-grade-players {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mt-grade-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--r-xs);
+  font-size: 12px;
+}
+
+.mt-grade-player.bench {
+  opacity: 0.55;
+}
+
+.mt-grade-player-name {
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-grade-player-role {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  width: 48px;
+}
+
+.mt-grade-player.flex .mt-grade-player-role {
+  color: var(--accent);
+}
+
+.mt-grade-player-rank {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  width: 36px;
+  text-align: right;
+}
+
+.mt-grade-player-score {
+  font-size: 11px;
+  font-weight: 800;
+  width: 28px;
+  text-align: right;
+  color: var(--accent);
 }

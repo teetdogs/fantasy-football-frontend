@@ -180,18 +180,32 @@ export interface DropCandidate extends RosterPlayer {
   surplus: boolean;
 }
 
+export interface GradedPlayer {
+  playerId: number;
+  name: string;
+  position: string;
+  team: string;
+  consensusRank: number | null;
+  projectedPoints: number | null;
+  score: number;
+  letter: string;
+  color: string;
+  role: 'starter' | 'flex' | 'bench';
+}
+
 export interface PositionGrade {
   score: number;
   letter: string;
   color: string;
   count: number;
-  topPlayer: { name: string; rank: number } | null;
+  players: { name: string; rank: number | null; score: number; role: string }[];
   depth: 'empty' | 'thin' | 'ok' | 'deep';
 }
 
 export interface TeamGrade {
   overall: { score: number; letter: string; color: string };
   positions: Record<string, PositionGrade>;
+  players: GradedPlayer[];
   summary: string;
 }
 
