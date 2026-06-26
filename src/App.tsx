@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CSSProperties } from 'react';
-import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam, TradeAnalyzer, PowerRankings, PlayerCompare, ByeWeek } from './components';
+import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam, TradeAnalyzer, PowerRankings, PlayerCompare, ByeWeek, NewsFeed, Ticker } from './components';
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import { useAuth } from './hooks/useAuth';
@@ -30,6 +30,7 @@ const TABS = [
   { id: 'myteam', label: 'My Team' },
   { id: 'rankings', label: 'Power Rankings' },
   { id: 'byes', label: 'Bye Weeks' },
+  { id: 'news', label: 'News' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -158,6 +159,8 @@ function App() {
         </div>
       </header>
 
+      <Ticker />
+
       <div className={showSidebar ? 'shell' : 'shell shell-full'}>
         {showSidebar && <aside className="panel">
           <h3 className="panel-title">Find players</h3>
@@ -273,6 +276,7 @@ function App() {
             {activeTab === 'myteam' && <MyTeam user={auth.user} players={players} />}
             {activeTab === 'rankings' && <PowerRankings />}
             {activeTab === 'byes' && <ByeWeek />}
+            {activeTab === 'news' && <NewsFeed />}
           </div>
         </main>
       </div>
