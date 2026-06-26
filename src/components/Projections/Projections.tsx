@@ -1,5 +1,18 @@
+import { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import type { Player } from '../../types';
 import './Projections.css';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+function loadCreds() {
+  try {
+    const raw = localStorage.getItem('draftlab_league');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.creds?.leagueId ? parsed.creds : null;
+  } catch { return null; }
+}
 
 interface ProjectionsProps {
   players: Player[];
@@ -96,12 +109,31 @@ function takeaway(p: Player): string {
 }
 
 export const Projections: React.FC<ProjectionsProps> = ({ players, positionFilter, search, loading }) => {
+  const [myTeamOnly, setMyTeamOnly] = useState(false);
+  const [rosterIds, setRosterIds] = useState<Set<number>>(new Set());
+  const [creds] = useState(loadCreds);
+  const hasLeague = !!creds;
+
+  useEffect(() => {
+    if (!creds || rosterIds.size > 0) return;
+    const savedTeamId = localStorage.getItem('draftlab_myteam_id');
+    if (!savedTeamId) return;
+    axios.post(`${API_URL}/api/league/my-team`, { ...creds, teamId: Number(savedTeamId) })
+      .then((res) => {
+        const ids = new Set<number>((res.data.roster || []).map((p: { playerId: number }) => p.playerId));
+        setRosterIds(ids);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creds]);
+
   const query = (search || '').trim().toLowerCase();
-  const list = players.filter(
+  const list = useMemo(() => players.filter(
     (p) =>
       (!positionFilter || p.position === positionFilter) &&
-      (!query || p.name.toLowerCase().includes(query))
-  );
+      (!query || p.name.toLowerCase().includes(query)) &&
+      (!myTeamOnly || rosterIds.has(p.id))
+  ), [players, positionFilter, query, myTeamOnly, rosterIds]);
 
   if (loading && !players.length) {
     return (
@@ -121,7 +153,17 @@ export const Projections: React.FC<ProjectionsProps> = ({ players, positionFilte
             Last season's real numbers next to this season's projection for every player. PPR scoring.
           </p>
         </div>
-        <span className="count tnum">{list.length} players</span>
+        <div className="proj-head-right">
+          {hasLeague && (
+            <button
+              className={`proj-team-toggle ${myTeamOnly ? 'active' : ''}`}
+              onClick={() => setMyTeamOnly((v) => !v)}
+            >
+              {myTeamOnly ? 'My Team' : 'All Players'}
+            </button>
+          )}
+          <span className="count tnum">{list.length} players</span>
+        </div>
       </div>
 
       <div className="proj-list">
