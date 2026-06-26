@@ -5,7 +5,6 @@ export { LeagueSync } from './LeagueSync/LeagueSync';
 export { MyTeam } from './MyTeam/MyTeam';
 export { TradeAnalyzer } from './TradeAnalyzer/TradeAnalyzer';
 export { PowerRankings } from './PowerRankings/PowerRankings';
-export { PlayerCompare } from './PlayerCompare/PlayerCompare';
 export { ByeWeek } from './ByeWeek/ByeWeek';
 export { NewsFeed } from './NewsFeed/NewsFeed';
 export { Ticker } from './Ticker/Ticker';
