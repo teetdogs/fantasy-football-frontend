@@ -8,6 +8,7 @@ const POLL_MS = 10 * 60 * 1000; // 10 minutes
 interface TickerItem {
   headline: string;
   type: 'nfl' | 'fantasy';
+  source: string;
   link: string | null;
 }
 

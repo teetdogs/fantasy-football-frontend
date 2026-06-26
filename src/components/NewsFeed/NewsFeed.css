@@ -65,7 +65,9 @@
   transform: translateY(-2px);
 }
 
+/* ====== Image + source badge ====== */
 .nf-img-wrap {
+  position: relative;
   height: 160px;
   overflow: hidden;
   background: var(--surface-3);
@@ -77,6 +79,31 @@
   object-fit: cover;
 }
 
+.nf-no-img {
+  position: relative;
+  height: 40px;
+  background: var(--surface-3);
+}
+
+.nf-source-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
+.nf-source-badge.static {
+  top: 10px;
+}
+
+/* ====== Article content ====== */
 .nf-content {
   padding: 12px 14px;
   display: flex;
@@ -134,4 +161,34 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ====== Team news section ====== */
+.nf-team-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.nf-team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.nf-team-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.nf-team-select {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
 }
