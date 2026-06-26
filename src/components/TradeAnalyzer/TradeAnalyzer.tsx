@@ -27,14 +27,16 @@ interface ValuedPlayer {
   player: { id: number; name: string; position: string; team: string; consensusRank: number; projectedPoints: number };
   value: number;
   rankScore: number;
-  ptsScore: number;
+  vor: number;
+  scarcity: number;
 }
 
 interface TradeResult {
-  giving: { players: ValuedPlayer[]; totalValue: number };
-  getting: { players: ValuedPlayer[]; totalValue: number };
+  giving: { players: ValuedPlayer[]; totalValue: number; rawValue: number };
+  getting: { players: ValuedPlayer[]; totalValue: number; rawValue: number };
   differential: number;
   verdict: string;
+  notes: string[];
 }
 
 function PlayerSearch({ players, usedIds, onAdd, placeholder }: {
@@ -219,12 +221,28 @@ export function TradeAnalyzer({ players }: Props) {
                   <div className={`ta-valued ${isGiving ? 'give' : 'get'}`} key={vp.player.id}>
                     <span className="pos-badge" data-pos={vp.player.position.toLowerCase()}>{vp.player.position}</span>
                     <span className="ta-vp-name">{vp.player.name}</span>
+                    {vp.scarcity > 1.05 && <span className="ta-vp-prem" title="Positional scarcity premium">★</span>}
                     <span className="ta-vp-label">{isGiving ? 'Give' : 'Get'}</span>
                     <span className="ta-vp-val tnum">{vp.value}</span>
                   </div>
                 );
               })}
             </div>
+
+            {(result.giving.rawValue !== result.giving.totalValue || result.getting.rawValue !== result.getting.totalValue) && (
+              <div className="ta-consolidation">
+                <span>Give: {result.giving.rawValue} raw → <strong>{result.giving.totalValue}</strong></span>
+                <span>Get: {result.getting.rawValue} raw → <strong>{result.getting.totalValue}</strong></span>
+              </div>
+            )}
+
+            {result.notes.length > 0 && (
+              <div className="ta-notes">
+                {result.notes.map((note, i) => (
+                  <div className="ta-note-item" key={i}>{note}</div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

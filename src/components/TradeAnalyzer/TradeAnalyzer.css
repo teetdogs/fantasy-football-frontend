@@ -262,6 +262,43 @@
   text-align: right;
 }
 
+.ta-vp-prem {
+  font-size: 11px;
+  color: var(--pos-te, #f6a23c);
+}
+
+.ta-consolidation {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: var(--r-xs);
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+.ta-consolidation strong {
+  color: var(--text);
+}
+
+.ta-notes {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ta-note-item {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  padding: 8px 12px;
+  background: rgba(87, 166, 255, 0.06);
+  border-left: 3px solid #57a6ff;
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+}
+
 /* ====== Suggested Trades ====== */
 .ta-suggestions {
   border-top: 1px solid var(--border);
