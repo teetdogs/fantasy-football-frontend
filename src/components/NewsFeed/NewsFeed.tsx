@@ -76,6 +76,10 @@ export function NewsFeed() {
   const [teamArticles, setTeamArticles] = useState<Article[]>([]);
   const [teamLoading, setTeamLoading] = useState(false);
 
+  const PAGE = 12;
+  const [headlineVisible, setHeadlineVisible] = useState(PAGE);
+  const [teamVisible, setTeamVisible] = useState(PAGE);
+
   useEffect(() => {
     axios.get(`${API_URL}/api/news`)
       .then((res) => setArticles(res.data.articles || []))
@@ -86,11 +90,15 @@ export function NewsFeed() {
   useEffect(() => {
     if (!selectedTeam) { setTeamArticles([]); return; }
     setTeamLoading(true);
+    setTeamVisible(PAGE);
     axios.get(`${API_URL}/api/news/team/${selectedTeam}`)
       .then((res) => setTeamArticles(res.data.articles || []))
       .catch(() => setTeamArticles([]))
       .finally(() => setTeamLoading(false));
   }, [selectedTeam]);
+
+  // Reset the headline page count when the filter changes.
+  useEffect(() => { setHeadlineVisible(PAGE); }, [filter]);
 
   const filtered = useMemo(() => {
     if (filter === 'all') return articles;
@@ -133,8 +141,14 @@ export function NewsFeed() {
             {!loading && filtered.length === 0 && <p className="nf-note">No articles found.</p>}
 
             <div className="nf-grid">
-              {filtered.map((a) => <ArticleCard key={a.id} a={a} />)}
+              {filtered.slice(0, headlineVisible).map((a) => <ArticleCard key={a.id} a={a} />)}
             </div>
+
+            {headlineVisible < filtered.length && (
+              <button className="nf-more" onClick={() => setHeadlineVisible((v) => v + PAGE)}>
+                Load More ({filtered.length - headlineVisible} more)
+              </button>
+            )}
           </>
         )}
 
@@ -166,8 +180,13 @@ export function NewsFeed() {
               <>
                 <h3 className="nf-team-results-title">{selectedTeamName} News</h3>
                 <div className="nf-grid">
-                  {teamArticles.map((a) => <ArticleCard key={a.id} a={a} />)}
+                  {teamArticles.slice(0, teamVisible).map((a) => <ArticleCard key={a.id} a={a} />)}
                 </div>
+                {teamVisible < teamArticles.length && (
+                  <button className="nf-more" onClick={() => setTeamVisible((v) => v + PAGE)}>
+                    Load More ({teamArticles.length - teamVisible} more)
+                  </button>
+                )}
               </>
             )}
           </>
