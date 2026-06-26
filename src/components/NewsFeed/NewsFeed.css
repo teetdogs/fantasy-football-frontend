@@ -9,7 +9,49 @@
   padding: 8px 0;
 }
 
-/* ====== Filters ====== */
+/* ====== Section tabs (Headlines / Team News) ====== */
+.nf-section-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.nf-section-tab {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nf-section-tab:hover {
+  color: var(--text);
+}
+
+.nf-section-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ====== Filter bar ====== */
+.nf-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.nf-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
 .nf-filters {
   display: flex;
   gap: 0;
@@ -163,32 +205,63 @@
   overflow: hidden;
 }
 
-/* ====== Team news section ====== */
-.nf-team-section {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+/* ====== Team picker ====== */
+.nf-team-picker {
+  margin-bottom: 20px;
 }
 
-.nf-team-header {
+.nf-team-prompt {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.nf-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 6px;
+}
+
+.nf-team-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
 }
 
-.nf-team-title {
+.nf-team-btn:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+
+.nf-team-btn.active {
+  border-color: var(--accent);
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.nf-team-abbrev {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  width: 28px;
+}
+
+.nf-team-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nf-team-results-title {
   font-size: 16px;
   font-weight: 800;
   color: var(--text);
-}
-
-.nf-team-select {
-  padding: 7px 14px;
-  font-size: 13px;
-  font-family: inherit;
-  background: var(--surface-2);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
+  margin-bottom: 14px;
 }

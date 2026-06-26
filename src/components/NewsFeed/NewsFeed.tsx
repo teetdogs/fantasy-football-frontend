@@ -4,11 +4,23 @@ import './NewsFeed.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-const NFL_TEAMS = [
-  'ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE',
-  'DAL','DEN','DET','GB','HOU','IND','JAX','KC',
-  'LAC','LAR','LV','MIA','MIN','NE','NO','NYG',
-  'NYJ','PHI','PIT','SEA','SF','TB','TEN','WSH',
+const NFL_TEAMS: { abbrev: string; name: string }[] = [
+  { abbrev: 'ARI', name: 'Arizona Cardinals' }, { abbrev: 'ATL', name: 'Atlanta Falcons' },
+  { abbrev: 'BAL', name: 'Baltimore Ravens' }, { abbrev: 'BUF', name: 'Buffalo Bills' },
+  { abbrev: 'CAR', name: 'Carolina Panthers' }, { abbrev: 'CHI', name: 'Chicago Bears' },
+  { abbrev: 'CIN', name: 'Cincinnati Bengals' }, { abbrev: 'CLE', name: 'Cleveland Browns' },
+  { abbrev: 'DAL', name: 'Dallas Cowboys' }, { abbrev: 'DEN', name: 'Denver Broncos' },
+  { abbrev: 'DET', name: 'Detroit Lions' }, { abbrev: 'GB', name: 'Green Bay Packers' },
+  { abbrev: 'HOU', name: 'Houston Texans' }, { abbrev: 'IND', name: 'Indianapolis Colts' },
+  { abbrev: 'JAX', name: 'Jacksonville Jaguars' }, { abbrev: 'KC', name: 'Kansas City Chiefs' },
+  { abbrev: 'LAC', name: 'Los Angeles Chargers' }, { abbrev: 'LAR', name: 'Los Angeles Rams' },
+  { abbrev: 'LV', name: 'Las Vegas Raiders' }, { abbrev: 'MIA', name: 'Miami Dolphins' },
+  { abbrev: 'MIN', name: 'Minnesota Vikings' }, { abbrev: 'NE', name: 'New England Patriots' },
+  { abbrev: 'NO', name: 'New Orleans Saints' }, { abbrev: 'NYG', name: 'New York Giants' },
+  { abbrev: 'NYJ', name: 'New York Jets' }, { abbrev: 'PHI', name: 'Philadelphia Eagles' },
+  { abbrev: 'PIT', name: 'Pittsburgh Steelers' }, { abbrev: 'SEA', name: 'Seattle Seahawks' },
+  { abbrev: 'SF', name: 'San Francisco 49ers' }, { abbrev: 'TB', name: 'Tampa Bay Buccaneers' },
+  { abbrev: 'TEN', name: 'Tennessee Titans' }, { abbrev: 'WSH', name: 'Washington Commanders' },
 ];
 
 interface Article {
@@ -55,6 +67,7 @@ function ArticleCard({ a }: { a: Article }) {
 }
 
 export function NewsFeed() {
+  const [section, setSection] = useState<'headlines' | 'team'>('headlines');
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'nfl' | 'fantasy'>('all');
@@ -84,6 +97,8 @@ export function NewsFeed() {
     return articles.filter((a) => a.type === filter);
   }, [articles, filter]);
 
+  const selectedTeamName = NFL_TEAMS.find((t) => t.abbrev === selectedTeam)?.name;
+
   return (
     <div className="card">
       <div className="card-head">
@@ -91,48 +106,72 @@ export function NewsFeed() {
           <h2>NFL News</h2>
           <p className="card-sub">Latest headlines from ESPN, NFL.com, and Yahoo Sports.</p>
         </div>
-        <div className="nf-filters">
-          <button className={`nf-filter ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
-          <button className={`nf-filter ${filter === 'nfl' ? 'active' : ''}`} onClick={() => setFilter('nfl')}>NFL</button>
-          <button className={`nf-filter ${filter === 'fantasy' ? 'active' : ''}`} onClick={() => setFilter('fantasy')}>Fantasy</button>
-        </div>
+      </div>
+
+      <div className="nf-section-tabs">
+        <button className={`nf-section-tab ${section === 'headlines' ? 'active' : ''}`} onClick={() => setSection('headlines')}>
+          Headlines
+        </button>
+        <button className={`nf-section-tab ${section === 'team' ? 'active' : ''}`} onClick={() => setSection('team')}>
+          Team News
+        </button>
       </div>
 
       <div className="nf-body">
-        {loading && <p className="nf-note">Loading news…</p>}
-
-        {!loading && filtered.length === 0 && <p className="nf-note">No articles found.</p>}
-
-        <div className="nf-grid">
-          {filtered.map((a) => <ArticleCard key={a.id} a={a} />)}
-        </div>
-
-        {/* Team-specific news section */}
-        <div className="nf-team-section">
-          <div className="nf-team-header">
-            <h3 className="nf-team-title">Team News</h3>
-            <select className="nf-team-select" value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
-              <option value="">Select a team…</option>
-              {NFL_TEAMS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-
-          {teamLoading && <p className="nf-note">Loading team news…</p>}
-
-          {!teamLoading && selectedTeam && teamArticles.length === 0 && (
-            <p className="nf-note">No news found for {selectedTeam}.</p>
-          )}
-
-          {!teamLoading && teamArticles.length > 0 && (
-            <div className="nf-grid">
-              {teamArticles.map((a) => <ArticleCard key={a.id} a={a} />)}
+        {section === 'headlines' && (
+          <>
+            <div className="nf-filter-bar">
+              <div className="nf-filters">
+                <button className={`nf-filter ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
+                <button className={`nf-filter ${filter === 'nfl' ? 'active' : ''}`} onClick={() => setFilter('nfl')}>NFL</button>
+                <button className={`nf-filter ${filter === 'fantasy' ? 'active' : ''}`} onClick={() => setFilter('fantasy')}>Fantasy</button>
+              </div>
+              <span className="nf-count tnum">{filtered.length} articles</span>
             </div>
-          )}
 
-          {!selectedTeam && <p className="nf-note">Pick a team above to see their latest news.</p>}
-        </div>
+            {loading && <p className="nf-note">Loading news…</p>}
+            {!loading && filtered.length === 0 && <p className="nf-note">No articles found.</p>}
+
+            <div className="nf-grid">
+              {filtered.map((a) => <ArticleCard key={a.id} a={a} />)}
+            </div>
+          </>
+        )}
+
+        {section === 'team' && (
+          <>
+            <div className="nf-team-picker">
+              <p className="nf-team-prompt">Select a team to see their latest news</p>
+              <div className="nf-team-grid">
+                {NFL_TEAMS.map((t) => (
+                  <button
+                    key={t.abbrev}
+                    className={`nf-team-btn ${selectedTeam === t.abbrev ? 'active' : ''}`}
+                    onClick={() => setSelectedTeam(t.abbrev)}
+                  >
+                    <span className="nf-team-abbrev">{t.abbrev}</span>
+                    <span className="nf-team-name">{t.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {teamLoading && <p className="nf-note">Loading {selectedTeamName} news…</p>}
+
+            {!teamLoading && selectedTeam && teamArticles.length === 0 && (
+              <p className="nf-note">No news found for the {selectedTeamName}.</p>
+            )}
+
+            {!teamLoading && teamArticles.length > 0 && (
+              <>
+                <h3 className="nf-team-results-title">{selectedTeamName} News</h3>
+                <div className="nf-grid">
+                  {teamArticles.map((a) => <ArticleCard key={a.id} a={a} />)}
+                </div>
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
