@@ -136,17 +136,19 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
               </div>
             </div>
 
-            <div className="ls-section">
-              <h4>Scoring</h4>
-              <div className="ls-scoring">
-                {Object.entries(settings.scoring).map(([key, val]) => (
-                  <div className="ls-score-rule" key={key}>
-                    <span className="ls-score-label">{formatScoringLabel(key)}</span>
-                    <span className="ls-score-val">{typeof val === 'number' ? val : String(val)} pts</span>
-                  </div>
-                ))}
+            {settings.scoring && Object.keys(settings.scoring).length > 0 && (
+              <div className="ls-section">
+                <h4>Scoring</h4>
+                <div className="ls-scoring">
+                  {Object.entries(settings.scoring).map(([key, val]) => (
+                    <div className="ls-score-rule" key={key}>
+                      <span className="ls-score-label">{formatScoringLabel(key)}</span>
+                      <span className="ls-score-val">{typeof val === 'number' ? val : String(val)} pts</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="ls-section">
               <h4>Draft</h4>
@@ -170,7 +172,7 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
                   {teams.map((t) => (
                     <div className="ls-team-row" key={t.teamId}>
                       <span className="ls-team-name">{t.name}</span>
-                      <span className="ls-team-owner">{t.owner}</span>
+                      {t.owner && t.owner !== 'Unknown' && <span className="ls-team-owner">{t.owner}</span>}
                       {t.record && (
                         <span className="ls-team-record">{t.record.wins}-{t.record.losses}{t.record.ties ? `-${t.record.ties}` : ''}</span>
                       )}
