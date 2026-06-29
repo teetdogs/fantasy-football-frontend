@@ -37,6 +37,22 @@ interface TradeResult {
   differential: number;
   verdict: string;
   notes: string[];
+  context: string;
+}
+
+// Derive trade valuation context from the connected league's saved settings.
+function loadLeagueContext(): { scoringFormat?: string; numTeams?: number; superflex?: boolean } | null {
+  try {
+    const raw = localStorage.getItem('draftlab_league');
+    if (!raw) return null;
+    const { settings } = JSON.parse(raw);
+    if (!settings) return null;
+    return {
+      scoringFormat: settings.scoringFormat,
+      numTeams: settings.size,
+      superflex: !!settings.rosterSlots?.some((s: { position: string }) => s.position === 'SUPERFLEX'),
+    };
+  } catch { return null; }
 }
 
 function PlayerSearch({ players, usedIds, onAdd, placeholder }: {
@@ -93,6 +109,7 @@ export function TradeAnalyzer({ players }: Props) {
   const [suggestions, setSuggestions] = useState<TradeSuggestion[]>([]);
   const [sugLoading, setSugLoading] = useState(false);
   const [creds] = useState(loadCreds);
+  const [leagueCtx] = useState(loadLeagueContext);
 
   useEffect(() => {
     if (!creds) return;
@@ -119,6 +136,7 @@ export function TradeAnalyzer({ players }: Props) {
       const res = await axios.post(`${API_URL}/api/draft/trade`, {
         giving: giving.map((p) => p.id),
         getting: getting.map((p) => p.id),
+        league: leagueCtx || {},
       });
       setResult(res.data);
     } catch {
@@ -143,8 +161,13 @@ export function TradeAnalyzer({ players }: Props) {
       <div className="card-head">
         <div>
           <h2>Trade Analyzer</h2>
-          <p className="card-sub">Compare the value of players on each side of a trade.</p>
+          <p className="card-sub">Value-over-replacement weighted by position scarcity and your league's scoring.</p>
         </div>
+        {leagueCtx && (
+          <span className="ta-league-badge">
+            {[leagueCtx.numTeams && `${leagueCtx.numTeams}-team`, leagueCtx.scoringFormat, leagueCtx.superflex && 'Superflex'].filter(Boolean).join(' ')}
+          </span>
+        )}
       </div>
 
       <div className="ta-body">
