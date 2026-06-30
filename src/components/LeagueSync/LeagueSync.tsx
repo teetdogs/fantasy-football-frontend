@@ -72,7 +72,14 @@ export function LeagueSync() {
     }
   };
 
-  const startAdd = () => { setAdding(true); setLeagueId(''); setSwid(''); setEspnS2(''); setError(null); };
+  // SWID/espn_s2 are account-level, so reuse them — only the league ID differs.
+  const startAdd = () => {
+    setAdding(true);
+    setLeagueId('');
+    setSwid(activeLeague?.creds.swid || '');
+    setEspnS2(activeLeague?.creds.espnS2 || '');
+    setError(null);
+  };
   const cancelAdd = () => { setAdding(false); setError(null); };
 
   if (connected && settings) {
