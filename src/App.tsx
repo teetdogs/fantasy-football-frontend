@@ -4,8 +4,11 @@ import { PlayerRanking, DraftBoard, NameGenerator, LeagueSync, MyTeam, TradeAnal
 import { Projections } from './components/Projections/Projections';
 import { useFetchPlayers, useMeta } from './hooks/useFetchPlayers';
 import { useAuth } from './hooks/useAuth';
+import { LeagueProvider, useLeagues } from './contexts/LeagueContext';
 import type { RankingWeights } from './types';
 import './App.css';
+
+type Auth = ReturnType<typeof useAuth>;
 
 const DEFAULT_WEIGHTS: RankingWeights = {
   adpWeight: 0.4,
@@ -36,7 +39,7 @@ type TabId = (typeof TABS)[number]['id'];
 
 const SIDEBAR_TABS = new Set<TabId>(['table', 'projections']);
 
-function App() {
+function AppContent({ auth }: { auth: Auth }) {
   const [activeTab, setActiveTab] = useState<TabId>('table');
   const [weights, setWeights] = useState<RankingWeights>(DEFAULT_WEIGHTS);
   const [positionFilter, setPositionFilter] = useState<string>('');
@@ -46,9 +49,14 @@ function App() {
 
   const { players, loading, error, retry } = useFetchPlayers(weights);
   const meta = useMeta();
-  const auth = useAuth();
+  const { leagues, activeLeagueId, switchLeague } = useLeagues();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLeagueMenu, setShowLeagueMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const leagueMenuRef = useRef<HTMLDivElement>(null);
+
+  const activeLeague = leagues.find((l) => l.creds.leagueId === activeLeagueId) || null;
+  const leagueLabel = (l: typeof leagues[number]) => l.name || l.settings?.name || `League ${l.creds.leagueId}`;
 
   // Close the user dropdown when clicking outside it.
   useEffect(() => {
@@ -61,6 +69,18 @@ function App() {
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, [showUserMenu]);
+
+  // Close the league switcher when clicking outside it.
+  useEffect(() => {
+    if (!showLeagueMenu) return;
+    const onClick = (e: MouseEvent) => {
+      if (leagueMenuRef.current && !leagueMenuRef.current.contains(e.target as Node)) {
+        setShowLeagueMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [showLeagueMenu]);
 
   const showSidebar = SIDEBAR_TABS.has(activeTab);
   const showError = error && SIDEBAR_TABS.has(activeTab);
@@ -124,6 +144,32 @@ function App() {
                 : '2026 season'}
             </span>
           </div>
+
+          {leagues.length > 0 && (
+            <div className="league-switcher" ref={leagueMenuRef}>
+              <button className="league-switcher-btn" onClick={() => setShowLeagueMenu((v) => !v)}>
+                <span className="league-switcher-name">{activeLeague ? leagueLabel(activeLeague) : 'Select league'}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
+              {showLeagueMenu && (
+                <div className="league-dropdown">
+                  {leagues.map((l) => (
+                    <button
+                      key={l.creds.leagueId}
+                      className={`league-dropdown-item ${l.creds.leagueId === activeLeagueId ? 'active' : ''}`}
+                      onClick={() => { switchLeague(l.creds.leagueId); setShowLeagueMenu(false); }}
+                    >
+                      <span className="league-dropdown-dot" />
+                      {leagueLabel(l)}
+                    </button>
+                  ))}
+                  <button className="league-dropdown-add" onClick={() => { switchTab('league'); setShowLeagueMenu(false); }}>
+                    + Add a league
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {auth.loading ? null : auth.user ? (
             <div className="user-menu-wrap" ref={userMenuRef}>
@@ -260,7 +306,7 @@ function App() {
             ))}
           </nav>
 
-          <div className="tab-panel">
+          <div className="tab-panel" key={activeLeagueId || 'no-league'}>
             {activeTab === 'table' && (
               <PlayerRanking weights={weights} positionFilter={positionFilter} search={search} />
             )}
@@ -270,7 +316,7 @@ function App() {
             {activeTab === 'board' && <DraftBoard players={players} />}
             {activeTab === 'names' && <NameGenerator players={players} />}
             {activeTab === 'trade' && <TradeAnalyzer players={players} />}
-            {activeTab === 'league' && <LeagueSync user={auth.user} linkLeague={auth.linkLeague} />}
+            {activeTab === 'league' && <LeagueSync />}
             {activeTab === 'myteam' && <MyTeam user={auth.user} players={players} />}
             {activeTab === 'rankings' && <PowerRankings />}
             {activeTab === 'byes' && <ByeWeek />}
@@ -279,6 +325,15 @@ function App() {
         </main>
       </div>
     </div>
+  );
+}
+
+function App() {
+  const auth = useAuth();
+  return (
+    <LeagueProvider user={auth.user}>
+      <AppContent auth={auth} />
+    </LeagueProvider>
   );
 }
 

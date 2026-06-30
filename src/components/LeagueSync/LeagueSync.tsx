@@ -1,43 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import type { LeagueSettings, LeagueTeam, LeagueCredentials } from '../../types';
+import type { LeagueCredentials } from '../../types';
+import { useLeagues } from '../../contexts/LeagueContext';
 import './LeagueSync.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const LS_KEY = 'draftlab_league';
 
-function loadSaved(): { creds: LeagueCredentials; settings: LeagueSettings; teams: LeagueTeam[] } | null {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
+export function LeagueSync() {
+  const { leagues, activeLeague, activeLeagueId, addOrUpdateLeague, removeLeague, switchLeague } = useLeagues();
 
-interface Props {
-  onConnected?: (settings: LeagueSettings, teams: LeagueTeam[], creds: LeagueCredentials) => void;
-  user?: { id: number; name: string; espn_league_id: string | null } | null;
-  linkLeague?: (leagueId: string, teamId?: number, swid?: string, espnS2?: string) => Promise<void>;
-}
-
-type Step = 'form' | 'connected';
-
-export function LeagueSync({ onConnected, user, linkLeague }: Props) {
-  const saved = loadSaved();
-  const [leagueId, setLeagueId] = useState(saved?.creds.leagueId || '');
-  const [swid, setSwid] = useState(saved?.creds.swid || '');
-  const [espnS2, setEspnS2] = useState(saved?.creds.espnS2 || '');
-  const [step, setStep] = useState<Step>(saved ? 'connected' : 'form');
+  const [leagueId, setLeagueId] = useState('');
+  const [swid, setSwid] = useState('');
+  const [espnS2, setEspnS2] = useState('');
+  const [adding, setAdding] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [settings, setSettings] = useState<LeagueSettings | null>(saved?.settings || null);
-  const [teams, setTeams] = useState<LeagueTeam[]>(saved?.teams || []);
   const [showGuide, setShowGuide] = useState(true);
   const [showS2, setShowS2] = useState(false);
 
-  useEffect(() => {
-    if (saved && settings) onConnected?.(settings, teams, saved.creds);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const settings = activeLeague?.settings || null;
+  const teams = activeLeague?.teams || [];
+  const connected = !!activeLeague && !!settings && !adding;
+  const leagueLabel = (l: typeof leagues[number]) => l.name || l.settings?.name || `League ${l.creds.leagueId}`;
 
   const cleanSwid = (v: string) => {
     let s = v.trim();
@@ -67,14 +51,16 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
         axios.post(`${API_URL}/api/league/teams`, creds),
       ]);
 
-      setSettings(settingsRes.data);
-      setTeams(teamsRes.data.teams || []);
-      setStep('connected');
-      localStorage.setItem(LS_KEY, JSON.stringify({ creds, settings: settingsRes.data, teams: teamsRes.data.teams || [] }));
-      onConnected?.(settingsRes.data, teamsRes.data.teams || [], creds);
-      if (user && linkLeague) {
-        linkLeague(creds.leagueId, undefined, creds.swid, creds.espnS2);
-      }
+      addOrUpdateLeague({
+        creds,
+        settings: settingsRes.data,
+        teams: teamsRes.data.teams || [],
+        name: settingsRes.data?.name,
+      });
+      setAdding(false);
+      setLeagueId('');
+      setSwid('');
+      setEspnS2('');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
         setError(err.response.data.error);
@@ -86,18 +72,10 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
     }
   };
 
-  const disconnect = () => {
-    setStep('form');
-    setSettings(null);
-    setTeams([]);
-    setError(null);
-    setLeagueId('');
-    setSwid('');
-    setEspnS2('');
-    localStorage.removeItem(LS_KEY);
-  };
+  const startAdd = () => { setAdding(true); setLeagueId(''); setSwid(''); setEspnS2(''); setError(null); };
+  const cancelAdd = () => { setAdding(false); setError(null); };
 
-  if (step === 'connected' && settings) {
+  if (connected && settings) {
     return (
       <div className="card ls">
         <div className="card-head">
@@ -106,10 +84,24 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
             <p className="card-sub">Connected to ESPN Fantasy Football</p>
           </div>
           <div className="ls-head-actions">
-            {user && <span className="ls-saved-badge">Saved to account</span>}
-            <button className="ls-disconnect" onClick={disconnect}>Disconnect</button>
+            <button className="ls-add-btn" onClick={startAdd}>+ Add league</button>
+            <button className="ls-disconnect" onClick={() => activeLeagueId && removeLeague(activeLeagueId)}>Remove</button>
           </div>
         </div>
+
+        {leagues.length > 1 && (
+          <div className="ls-league-tabs">
+            {leagues.map((l) => (
+              <button
+                key={l.creds.leagueId}
+                className={`ls-league-tab ${l.creds.leagueId === activeLeagueId ? 'active' : ''}`}
+                onClick={() => switchLeague(l.creds.leagueId)}
+              >
+                {leagueLabel(l)}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="ls-connected">
           <div className="ls-league-hero">
@@ -191,9 +183,12 @@ export function LeagueSync({ onConnected, user, linkLeague }: Props) {
     <div className="card ls">
       <div className="card-head">
         <div>
-          <h2>Connect Your League</h2>
+          <h2>{adding ? 'Add a League' : 'Connect Your League'}</h2>
           <p className="card-sub">Import your ESPN league settings so Draft Lab can tailor recommendations to your league's scoring and roster rules.</p>
         </div>
+        {adding && leagues.length > 0 && (
+          <button className="ls-cancel-btn" onClick={cancelAdd}>← Back to your leagues</button>
+        )}
       </div>
 
       <div className="ls-body">
